@@ -1,9 +1,19 @@
 -module(testModule2).
+%-define(NOTEST, 1). %This line is to disable the testing for this module
+-include_lib("eunit/include/eunit.hrl").
+
 -export([startSimpleTest/0]).
 -export([startNPipes/1]).
 -export([makePipes/3]).
 -export([connectPipes/1]).
 -export([stop/0, getAllConnectors/1]).
+
+-export([reverse_test/0]).
+-export([length_test/0]).
+reverse_test() -> lists:reverse([1,2,3]).
+length_test() -> ?assert(length([1,2,3]) =:= 3).
+basic_test_() ->
+       fun () -> ?assert(1 + 1 =:= 2) end.
 
 startSimpleTest() ->
 	%survivor:start(),
