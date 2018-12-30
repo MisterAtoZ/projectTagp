@@ -1,9 +1,9 @@
 -module(testModule).
--export([start/0]).
+-export([start/0, stop/0]).
 
 
 start() ->
-	%survivor:start(),
+	survivor:start(),
 	%observer:start(),
 	{ok, PipeTypePID} = resource_type:create(pipeTyp,[]),
 	{ok,Pipe1InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
@@ -17,6 +17,10 @@ start() ->
 	{ok,Location2} = resource_instance:list_locations(Pipe2InstPID),
 	{ok,Location3} = resource_instance:list_locations(Pipe3InstPID),
 	
+	io:format("~p is the location of pipe1 ~n", [Location1]),
+	io:format("~p is the location of pipe2 ~n", [Location2]),
+	io:format("~p is the location of pipe2 ~n", [Location3]),
+
 	connector:connect(P2C2,P3C1),
 	connector:connect(P1C1,P3C2),
 	connector:connect(P1C2,P2C1),
