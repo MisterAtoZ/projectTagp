@@ -13,9 +13,9 @@ start() ->
 	{ok,[P2C1,P2C2]} = resource_instance:list_connectors(Pipe2InstPID),
 	{ok,[P3C1,P3C2]} = resource_instance:list_connectors(Pipe3InstPID),
 
-	{ok,Location1} = resource_instance:list_locations(Pipe1InstPID),
-	{ok,Location2} = resource_instance:list_locations(Pipe2InstPID),
-	{ok,Location3} = resource_instance:list_locations(Pipe3InstPID),
+	{ok,[Location1]} = resource_instance:list_locations(Pipe1InstPID),
+	{ok,[Location2]} = resource_instance:list_locations(Pipe2InstPID),
+	{ok,[Location3]} = resource_instance:list_locations(Pipe3InstPID),
 	
 	io:format("~p is the location of pipe1 ~n", [Location1]),
 	io:format("~p is the location of pipe2 ~n", [Location2]),

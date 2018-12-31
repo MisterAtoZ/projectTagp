@@ -5,7 +5,7 @@ start() ->
 	register(survivor, spawn(?MODULE, init, [])).
 
 entry(Data)-> 
-	ets:insert(logboek, {{self()}, Data}). 
+	ets:insert(logboek, {{now(), self()}, Data}). 
 
 init() -> 
 	ets:new(logboek, [named_table, ordered_set, public]),		
@@ -15,4 +15,3 @@ loop() ->
 	receive
 		stop -> ok
 	end. 
-
