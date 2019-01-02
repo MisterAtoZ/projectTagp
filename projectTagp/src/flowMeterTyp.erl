@@ -65,3 +65,4 @@ eval(Flow, [Fn | RemFn] , Acc) ->
 	eval(Flow, RemFn, Acc + Fn(Flow));
 
 eval(_Flow, [], Acc) -> Acc. 
+
