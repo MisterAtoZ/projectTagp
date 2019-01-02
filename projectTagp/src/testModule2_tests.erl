@@ -16,40 +16,57 @@
 %First, the pipes are made, otherwise they can't be checked
 %%%links with the inspiration and help: https://stackoverflow.com/questions/22771788/eunit-how-to-test-a-simple-process
 % https://learnyousomeerlang.com/eunit
-startSimpleTest_test_() ->
-    {"Starting and stopping the system",
-    {foreach, %here is a foreach used to test if the stop function also works
-        fun return_startSimpleTest/0,
-        fun stop/1, %after each test, the survivor gets stopped, because only one survivor can exist
-        [fun checkPipes/1]
-    }}.
+% startSimpleTest_test_() ->
+%     {"Starting and stopping the system",
+%     {foreach, %here is a foreach used to test if the stop function also works
+%         fun return_startSimpleTest/0,
+%         fun stop/1, %after each test, the survivor gets stopped, because only one survivor can exist
+%         [fun checkPipes/1]
+%     }}.
 
-startNPipes_test_() ->
-    {"Tests if N Pipes are made and if they exist",
-    {setup,
-        fun return_startNPipes/0,
-        fun stop/1,
-        fun checkNPipes/1
-    }}.
+% startNPipes_test_() ->
+%     {"Tests if N Pipes are made and if they exist",
+%     {setup,
+%         fun return_startNPipes/0,
+%         fun stop/1,
+%         fun checkNPipes/1
+%     }}.
 
-startSimpleTestFluidum_test_() ->
-    {"Tests if the network is created and if the fluidum is added",
-    {setup,
-        fun return_startSimpleTestFluidum/0,
-        fun stop/1,
-        fun checkPipesWithFluidum/1
-    }}.
+% startSimpleTestFluidum_test_() ->
+%     {"Tests if the network is created and if the fluidum is added",
+%     {setup,
+%         fun return_startSimpleTestFluidum/0,
+%         fun stop/1,
+%         fun checkPipesWithFluidum/1
+%     }}.
 
-startSimpleTestFluidumPump_test_() ->
-    {"Tests if the network is created with a pump and if there is a fluidum",
+% startSimpleTestFluidumPump_test_() ->
+%     {"Tests if the network is created with a pump and if there is a fluidum",
+%     {setup,
+%         fun return_startSimpleTestFluidumPump/0,
+%         fun stop/1,
+%         fun({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}) ->
+%             [
+%                 checkPipesWithFluidumPump({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}),
+%                 checkPumpFunctions({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}),
+%                 checkPumpFlowInfluence({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst})
+%             ]
+%         end
+%     }}.
+
+startSimpleTestFluidumPumpFlowMeter_test_() ->
+    {"Test if the network is created with 3 pipes, pump and Flowmeter",
     {setup,
-        fun return_startSimpleTestFluidumPump/0,
+        fun return_startSimpleTestFluidumPumpFlowMeter/0,
         fun stop/1,
-        fun({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}) ->
+        fun({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst, FlowMeterTypePID, FlowMeterInst}) ->
             [
-                checkPipesWithFluidumPump({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}),
+                %The same as the previous testbuild are done for completion
+                checkPipesWithFluidumPump({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}), 
                 checkPumpFunctions({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}),
-                checkPumpFlowInfluence({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst})
+                checkPumpFlowInfluence({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}),
+                %The new tests to check the FlowMeter
+                checkFlowmeter({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst, FlowMeterTypePID, FlowMeterInst})
             ]
         end
     }}.
@@ -78,6 +95,10 @@ return_startSimpleTestFluidum() ->
 return_startSimpleTestFluidumPump() ->
     {ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}} = testModule2:startSimpleTestFluidumPump(),
     {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}.
+
+return_startSimpleTestFluidumPumpFlowMeter() ->
+    {ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst, FlowMeterTypePID, FlowMeterInst}} = testModule2:startSimpleTestFluidumPumpFlowMeter(),
+    {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst, FlowMeterTypePID, FlowMeterInst}.
 
 %===========================================================================================
 %THE ACTUAL TESTS
@@ -134,7 +155,7 @@ checkNPipes({PipeTypePID, Pipes, Connectors, Locations, N}) ->
         ?_assertEqual(N, length(Locations))
     ].
 
-checkPipesWithFluidum({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum}) ->
+checkPipesWithFluidum({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp,_Fluidum}) ->
     [Pipe1, Pipe2, Pipe3|_RestPipes] = Pipes,
     [C11, C12, C21, C22, C31, C32] = Connectors,
     [Location1, Location2, Location3] = Locations,
@@ -158,7 +179,7 @@ checkPipesWithFluidum({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fl
         %Check something for fluidum
     ].
 
-checkPipesWithFluidumPump({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}) ->
+checkPipesWithFluidumPump({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp,_Fluidum, PumpTypePID, PumpInst}) ->
     [Pipe1, Pipe2, Pipe3|_RestPipes] = Pipes,
     [C11, C12, C21, C22, C31, C32] = Connectors,
     [Location1, Location2, Location3] = Locations,
@@ -245,6 +266,23 @@ checkPumpFlowInfluence({_PipeTypePID,_Pipes,_Connectors,_Locations,_FluidumTyp,_
     TestFlowOn = ?_assertEqual(FlowOn(Flow), FlowReferenceOn),
     
     [FirstTests, TestFlowOff, TestPumpOn, TestFlowOn].
+
+checkFlowmeter({_PipeTypePID,_Pipes,_Connectors,_Locations,_FluidumTyp,_Fluidum,_PumpTypePID,_PumpInst, FlowMeterTypePID, FlowMeterInst}) ->
+    %First check if the processes are alive
+    FirstTests = [
+        ?_assert(erlang:is_process_alive(FlowMeterTypePID)),
+        ?_assert(erlang:is_process_alive(FlowMeterInst))],
+    
+    %If the processes are alive, the functionality of the flowmeter can get tested
+    {ok, FlowMeasured} = flowMeterInst:measure_flow(FlowMeterInst),
+    Test2 = ?_assertEqual(FlowMeasured,{ok,real_flow}), %Why does this not work with just real_flow?
+
+    %Testing the estimated value
+    {ok, EstFlow} = flowMeterInst:estimate_flow(FlowMeterInst),
+    Test3 = ?_assertEqual(EstFlow,iets), %This function does not work well
+
+    [FirstTests, Test2],%.
+    [FirstTests, Test2, Test3].
 
 
 %===========================================================================================
