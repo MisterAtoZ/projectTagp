@@ -6,10 +6,12 @@ An OTP application
 Build
 -----
 
+    $ rebar3 clean
     $ rebar3 compile
 
 or to also get the shell
 
+    $ rebar3 clean
     $ rebar3 shell
 
 ## Dialyzer tests

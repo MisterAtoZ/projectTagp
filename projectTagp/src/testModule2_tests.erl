@@ -32,6 +32,22 @@ startNPipes_test_() ->
         fun checkNPipes/1
     }}.
 
+startSimpleTestFluidum_test_() ->
+    {"Tests if the network is created and if the fluidum is added",
+    {setup,
+        fun return_startSimpleTestFluidum/0,
+        fun stop/1,
+        fun checkPipesWithFluidum/1
+    }}.
+
+startSimpleTestFluidumPump_test_() ->
+    {"Tests if the network is created with a pump and if there is a fluidum",
+    {setup,
+        fun return_startSimpleTestFluidumPump/0,
+        fun stop/1,
+        fun checkPipesWithFluidumPump/1
+    }}.
+
 %===========================================================================================
 %SETUP FUNCTIONS
 %===========================================================================================
@@ -43,11 +59,21 @@ return_startSimpleTest() ->
 
 stop(_) ->
     testModule2:stop().
+    %survivor ! stop, %Double check that the survivor closes
+	%{ok, stopped}.
 
 return_startNPipes() ->
     N = 5, %Has to be atleast 3! 
     {ok, {PipeTypePID, Pipes, Connectors, Location}} = testModule2:startNPipes(N),
     {PipeTypePID, Pipes, Connectors, Location, N}.
+
+return_startSimpleTestFluidum() ->
+    {ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum}} = testModule2:startSimpleTestFluidum(),
+    {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum}.
+
+return_startSimpleTestFluidumPump() ->
+    {ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}} = testModule2:startSimpleTestFluidumPump(),
+    {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}.
 
 %===========================================================================================
 %THE ACTUAL TESTS
@@ -104,7 +130,54 @@ checkNPipes({PipeTypePID, Pipes, Connectors, Locations, N}) ->
         ?_assertEqual(N, length(Locations))
     ].
 
+checkPipesWithFluidum({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum}) ->
+    [Pipe1, Pipe2, Pipe3|_RestPipes] = Pipes,
+    [C11, C12, C21, C22, C31, C32] = Connectors,
+    [Location1, Location2, Location3] = Locations,
+    %Check if the processes are running
+    %If all the tests pass, all the processes are running
+    [
+        ?_assert(erlang:is_process_alive(PipeTypePID)),
+        ?_assert(erlang:is_process_alive(Pipe1)),
+        ?_assert(erlang:is_process_alive(Pipe2)),
+        ?_assert(erlang:is_process_alive(Pipe3)),
+        ?_assert(erlang:is_process_alive(C11)),
+        ?_assert(erlang:is_process_alive(C12)),
+        ?_assert(erlang:is_process_alive(C21)),
+        ?_assert(erlang:is_process_alive(C22)),
+        ?_assert(erlang:is_process_alive(C31)),
+        ?_assert(erlang:is_process_alive(C32)),
+        ?_assert(erlang:is_process_alive(Location1)),
+        ?_assert(erlang:is_process_alive(Location2)),
+        ?_assert(erlang:is_process_alive(Location3)),
+        ?_assert(erlang:is_process_alive(FluidumTyp))
+        %Check something for fluidum
+    ].
 
+checkPipesWithFluidumPump({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}) ->
+    [Pipe1, Pipe2, Pipe3|_RestPipes] = Pipes,
+    [C11, C12, C21, C22, C31, C32] = Connectors,
+    [Location1, Location2, Location3] = Locations,
+    %Check if the processes are running
+    %If all the tests pass, all the processes are running
+    [
+        ?_assert(erlang:is_process_alive(PipeTypePID)),
+        ?_assert(erlang:is_process_alive(Pipe1)),
+        ?_assert(erlang:is_process_alive(Pipe2)),
+        ?_assert(erlang:is_process_alive(Pipe3)),
+        ?_assert(erlang:is_process_alive(C11)),
+        ?_assert(erlang:is_process_alive(C12)),
+        ?_assert(erlang:is_process_alive(C21)),
+        ?_assert(erlang:is_process_alive(C22)),
+        ?_assert(erlang:is_process_alive(C31)),
+        ?_assert(erlang:is_process_alive(C32)),
+        ?_assert(erlang:is_process_alive(Location1)),
+        ?_assert(erlang:is_process_alive(Location2)),
+        ?_assert(erlang:is_process_alive(Location3)),
+        ?_assert(erlang:is_process_alive(FluidumTyp)),
+        ?_assert(erlang:is_process_alive(PumpTypePID)),
+        ?_assert(erlang:is_process_alive(PumpInst))
+    ].
 %===========================================================================================
 %HELP FUNCTIONS
 %===========================================================================================

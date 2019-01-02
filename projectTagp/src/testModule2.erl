@@ -4,11 +4,14 @@
 
 -export([startSimpleTest/0]).
 -export([startNPipes/1]).
+-export([startSimpleTestFluidum/0]).
+-export([startSimpleTestFluidumPump/0]).
 -export([makePipes/3]).
 -export([connectPipes/1]).
 -export([stop/0, getAllConnectors/1]).
 
 startSimpleTest() ->
+	%This function makes a simple network with 3 pipes connected together
 	survivor:start(),
 	{ok, PipeTypePID} = resource_type:create(pipeTyp,[]),
 	{ok,Pipe1InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
@@ -36,10 +39,9 @@ startSimpleTest() ->
 	{ok, {Pipe1InstPID, Pipes, Connectors, Locations}}.
 
 startNPipes(N) ->
-	%This module strives to:
+	%This function strives to:
 	%1) Create N pipe instances
 	%2) Create a network containing all N pipes, connecting them in a circle
-	% observer:start(),
 	survivor:start(),
 	{ok,PipeTypePID} = resource_type:create(pipeTyp,[]),
 	Pipes = makePipes(N,[], PipeTypePID),
@@ -53,6 +55,87 @@ startNPipes(N) ->
 
 	{ok, {PipeTypePID, Pipes, Connectors, Locations}}.
 
+startSimpleTestFluidum() ->
+	%This function makes a simple network with 3 pipes connected together
+	%Afterwards it fill it up with water
+	survivor:start(),
+	{ok, PipeTypePID} = resource_type:create(pipeTyp,[]),
+	{ok,Pipe1InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
+	{ok,Pipe2InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
+	{ok,Pipe3InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
+	{ok,[P1C1,P1C2]} = resource_instance:list_connectors(Pipe1InstPID),
+	{ok,[P2C1,P2C2]} = resource_instance:list_connectors(Pipe2InstPID),
+	{ok,[P3C1,P3C2]} = resource_instance:list_connectors(Pipe3InstPID),
+
+	% {ok,[Location1]} = resource_instance:list_locations(Pipe1InstPID),
+	% {ok,[Location2]} = resource_instance:list_locations(Pipe2InstPID),
+	% {ok,[Location3]} = resource_instance:list_locations(Pipe3InstPID),
+	
+	% io:format("~p is the location of pipe1 ~n", [Location1]),
+	% io:format("~p is the location of pipe2 ~n", [Location2]),
+	% io:format("~p is the location of pipe2 ~n", [Location3]),
+
+	connector:connect(P2C2,P3C1),
+	connector:connect(P1C1,P3C2),
+	connector:connect(P1C2,P2C1),
+
+	Pipes = [Pipe1InstPID, Pipe2InstPID, Pipe3InstPID],
+	Connectors = getAllConnectors(Pipes),
+	Locations = getAllLocations(Pipes),
+
+	%Adding the fluidum to the just created network
+	FluidumTyp = fluidumTyp:create(),
+	{ok, Fluidum} = fluidumInst:create(P1C1, FluidumTyp), %as rootConnector is chosen for P1C1
+
+	{ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum}}.
+
+startSimpleTestFluidumPump() ->
+	%This function makes a simple network with 3 pipes connected together
+	%Add a pump and
+	%Afterwards it fill it up with water
+	survivor:start(),
+	{ok, PipeTypePID} = resource_type:create(pipeTyp,[]),
+	{ok,Pipe1InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
+	{ok,Pipe2InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
+	{ok,Pipe3InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
+	{ok,[P1C1,P1C2]} = resource_instance:list_connectors(Pipe1InstPID),
+	{ok,[P2C1,P2C2]} = resource_instance:list_connectors(Pipe2InstPID),
+	{ok,[P3C1,P3C2]} = resource_instance:list_connectors(Pipe3InstPID),
+
+	connector:connect(P2C2,P3C1),
+	connector:connect(P1C1,P3C2),
+	connector:connect(P1C2,P2C1),
+
+	%Create the pump
+	{ok, PumpTypePID} = pumpTyp:create(), %Need to creat a pumpType, not a resource_type!
+
+	RealWorldCmdFn = fun(on) -> %Local function
+						{ok,on};
+					(off) ->
+						{ok,off}
+					end,
+
+	%to create the PumpInst, the Host, PumpTyp_Pid, PipeInst_Pid, RealWorldCmdFn are needed
+	{ok,PumpInst} = pumpInst:create(self(), PumpTypePID, Pipe1InstPID, RealWorldCmdFn),
+
+	Pipes = [Pipe1InstPID, Pipe2InstPID, Pipe3InstPID],
+	Connectors = getAllConnectors(Pipes),
+	Locations = getAllLocations(Pipes),
+
+	%Adding the fluidum to the just created network
+	FluidumTyp = fluidumTyp:create(),
+	{ok, Fluidum} = fluidumInst:create(P1C1, FluidumTyp), %as rootConnector is chosen for P1C1
+
+	{ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}}.
+
+stop() ->
+	survivor:delete(logboek),
+	survivor ! stop,
+	{ok, stopped}.
+
+%===========================================================================================
+%HELP FUNCTIONS
+%===========================================================================================
 
 %Recursive Function to make N amount of pipes
 % makePipes(N,[], _PipeTypePID) when N =< 0 ->
@@ -94,14 +177,6 @@ connectPipes(FirstPipe, PipeToConnect, []) ->
 	{ok,[_P2C1,P2C2]} = resource_instance:list_connectors(PipeToConnect),
 	connector:connect(P1C1, P2C2).
 
-
-stop() ->
-	survivor ! stop,
-	{ok, stopped}.
-	
-%===========================================================================================
-%HELP FUNCTIONS
-%===========================================================================================
 
 %Function to return all the connectors from the pipes
 getAllConnectors(Pipes) ->

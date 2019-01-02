@@ -31,7 +31,7 @@ start_link() ->
 %% Before OTP 18 tuples must be used to specify a child. e.g.
 %% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
 init([]) ->
-    %observer:start(),
+    observer:start(),
 	%survivor:start(),
     %testModule2:startNPipes(5),
     %testModule:start(),
