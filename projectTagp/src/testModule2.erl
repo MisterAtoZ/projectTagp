@@ -129,8 +129,8 @@ startSimpleTestFluidumPump() ->
 	{ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}}.
 
 stop() ->
-	survivor:delete(logboek),
 	survivor ! stop,
+	%survivor:delete(),
 	{ok, stopped}.
 
 %===========================================================================================

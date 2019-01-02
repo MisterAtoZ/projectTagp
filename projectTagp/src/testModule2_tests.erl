@@ -45,7 +45,13 @@ startSimpleTestFluidumPump_test_() ->
     {setup,
         fun return_startSimpleTestFluidumPump/0,
         fun stop/1,
-        fun checkPipesWithFluidumPump/1
+        fun({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}) ->
+            [
+                checkPipesWithFluidumPump({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}),
+                checkPumpFunctions({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}),
+                checkPumpFlowInfluence({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst})
+            ]
+        end
     }}.
 
 %===========================================================================================
@@ -59,8 +65,6 @@ return_startSimpleTest() ->
 
 stop(_) ->
     testModule2:stop().
-    %survivor ! stop, %Double check that the survivor closes
-	%{ok, stopped}.
 
 return_startNPipes() ->
     N = 5, %Has to be atleast 3! 
@@ -178,6 +182,71 @@ checkPipesWithFluidumPump({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp
         ?_assert(erlang:is_process_alive(PumpTypePID)),
         ?_assert(erlang:is_process_alive(PumpInst))
     ].
+
+checkPumpFunctions({_PipeTypePID,_Pipes,_Connectors,_Locations,_FluidumTyp,_Fluidum, PumpTypePID, PumpInst}) ->
+
+    %To start, the pump should be off
+    {ok, OnOffState} = pumpInst:is_on(PumpInst),
+    FirstTests = [
+        ?_assert(erlang:is_process_alive(PumpTypePID)),
+        ?_assert(erlang:is_process_alive(PumpInst)),
+        ?_assertEqual(OnOffState,off)
+    ],
+
+    %Next function checked is to turn the pump on
+    pumpInst:switch_on(PumpInst),
+    %Now, the pump should be turned on
+    {ok, OnOffState2} = pumpInst:is_on(PumpInst),
+    Test2 = ?_assertEqual(OnOffState2, on),
+
+    %If switch_on is used again, it should still be on
+    pumpInst:switch_on(PumpInst),
+    %Now, the pump should still be turned on
+    {ok, OnOffState3} = pumpInst:is_on(PumpInst),
+    Test3 = ?_assertEqual(OnOffState3, on),
+
+    %It should be also checked that the pump shuts off again
+    pumpInst:switch_off(PumpInst),
+    %Now, the pump should be turned off
+    {ok, OnOffState4} = pumpInst:is_on(PumpInst),
+    Test4 = ?_assertEqual(OnOffState4, off),
+
+    %It should be also checked that the pump will stay shuts off when switch_off is used again
+    pumpInst:switch_off(PumpInst),
+    %Now, the pump should be turned off
+    {ok, OnOffState5} = pumpInst:is_on(PumpInst),
+    Test5 = ?_assertEqual(OnOffState5, off),
+
+    [FirstTests, Test2, Test3, Test4, Test5].
+
+checkPumpFlowInfluence({_PipeTypePID,_Pipes,_Connectors,_Locations,_FluidumTyp,_Fluidum, PumpTypePID, PumpInst}) ->
+    %The pump should be turned off, lets check that first
+    {ok, OnOffState} = pumpInst:is_on(PumpInst),
+    FirstTests = [
+        ?_assert(erlang:is_process_alive(PumpTypePID)), %These are not necessary but done to be complete
+        ?_assert(erlang:is_process_alive(PumpInst)),
+        ?_assertEqual(OnOffState,off)],
+
+    %A basic flow has to be set
+    Flow = 5,    
+
+    %The flow should be zero now
+    {ok, FlowOff} = pumpInst:flow_influence(PumpInst),
+    FlowReferenceOff = 0, %Here could also the same formula as FlowReferenceOn be used, this should ofcourse also give 0
+    TestFlowOff = ?_assertEqual(FlowOff(Flow), FlowReferenceOff),
+
+    %Now the pump is turned on and the flow is checked
+    pumpInst:switch_on(PumpInst),
+    {ok, OnOffState2} = pumpInst:is_on(PumpInst),
+    TestPumpOn = ?_assertEqual(OnOffState2,on),
+
+    {ok, FlowOn} = pumpInst:flow_influence(PumpInst),
+    FlowReferenceOn = 250 - 5 * Flow - 2 * Flow * Flow,
+    TestFlowOn = ?_assertEqual(FlowOn(Flow), FlowReferenceOn),
+    
+    [FirstTests, TestFlowOff, TestPumpOn, TestFlowOn].
+
+
 %===========================================================================================
 %HELP FUNCTIONS
 %===========================================================================================
