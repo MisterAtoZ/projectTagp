@@ -14,9 +14,10 @@ init() ->
 delete() ->
 	ets:delete_all_objects(logboek),
 	ets:delete(logboek),
-	ok.
+	unregister(survivor).
+	%loop().
 
 loop() -> 
 	receive
-		stop -> delete(), ok
+		stop -> ok%delete(), ok
 	end. 

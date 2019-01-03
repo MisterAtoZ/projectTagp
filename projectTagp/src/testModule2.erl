@@ -243,7 +243,7 @@ startSimpleTestFluidumPumpFlowMeterHeatEx() ->
 	{ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst, FlowMeterTypePID, FlowMeterInst, HeatExTypePID, HeatExInst}}.
 
 stop() ->
-	?debugFmt("dikke nest die shtoppe in originele file",[]),
+	?debugFmt("Stoppen in originele file",[]),
 	survivor ! stop,
 	{ok, stopped}.
 

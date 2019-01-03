@@ -99,7 +99,7 @@ return_startSimpleTest() ->
     {PipeTypePID, Pipes, Connectors, Locations}.
 
 stop(_) ->
-    ?debugFmt("dikke nest die shtoppe",[]),
+    ?debugFmt("Stoppen in test-file",[]),
     testModule2:stop().
 
 return_startNPipes() ->
