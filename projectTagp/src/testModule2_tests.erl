@@ -16,43 +16,43 @@
 %First, the pipes are made, otherwise they can't be checked
 %%%links with the inspiration and help: https://stackoverflow.com/questions/22771788/eunit-how-to-test-a-simple-process
 % https://learnyousomeerlang.com/eunit
-% startSimpleTest_test_() ->
-%     {"Starting and stopping the system",
-%     {foreach, %here is a foreach used to test if the stop function also works
-%         fun return_startSimpleTest/0,
-%         fun stop/1, %after each test, the survivor gets stopped, because only one survivor can exist
-%         [fun checkPipes/1]
-%     }}.
+startSimpleTest_test_() ->
+    {"Starting and stopping the system",
+    {foreach, %here is a foreach used to test if the stop function also works
+        fun return_startSimpleTest/0,
+        fun stop/1, %after each test, the survivor gets stopped, because only one survivor can exist
+        [fun checkPipes/1]
+    }}.
 
-% startNPipes_test_() ->
-%     {"Tests if N Pipes are made and if they exist",
-%     {setup,
-%         fun return_startNPipes/0,
-%         fun stop/1,
-%         fun checkNPipes/1
-%     }}.
+startNPipes_test_() ->
+    {"Tests if N Pipes are made and if they exist",
+    {setup,
+        fun return_startNPipes/0,
+        fun stop/1,
+        fun checkNPipes/1
+    }}.
 
-% startSimpleTestFluidum_test_() ->
-%     {"Tests if the network is created and if the fluidum is added",
-%     {setup,
-%         fun return_startSimpleTestFluidum/0,
-%         fun stop/1,
-%         fun checkPipesWithFluidum/1
-%     }}.
+startSimpleTestFluidum_test_() ->
+    {"Tests if the network is created and if the fluidum is added",
+    {setup,
+        fun return_startSimpleTestFluidum/0,
+        fun stop/1,
+        fun checkPipesWithFluidum/1
+    }}.
 
-% startSimpleTestFluidumPump_test_() ->
-%     {"Tests if the network is created with a pump and if there is a fluidum",
-%     {setup,
-%         fun return_startSimpleTestFluidumPump/0,
-%         fun stop/1,
-%         fun({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}) ->
-%             [
-%                 checkPipesWithFluidumPump({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}),
-%                 checkPumpFunctions({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}),
-%                 checkPumpFlowInfluence({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst})
-%             ]
-%         end
-%     }}.
+startSimpleTestFluidumPump_test_() ->
+    {"Tests if the network is created with a pump and if there is a fluidum",
+    {setup,
+        fun return_startSimpleTestFluidumPump/0,
+        fun stop/1,
+        fun({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}) ->
+            [
+                checkPipesWithFluidumPump({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}),
+                checkPumpFunctions({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}),
+                checkPumpFlowInfluence({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst})
+            ]
+        end
+    }}.
 
 startSimpleTestFluidumPumpFlowMeter_test_() ->
     {"Test if the network is created with 3 pipes, pump and Flowmeter",
@@ -99,6 +99,7 @@ return_startSimpleTest() ->
     {PipeTypePID, Pipes, Connectors, Locations}.
 
 stop(_) ->
+    ?debugFmt("dikke nest die shtoppe",[]),
     testModule2:stop().
 
 return_startNPipes() ->

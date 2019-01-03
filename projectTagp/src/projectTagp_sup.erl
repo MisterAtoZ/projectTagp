@@ -33,10 +33,10 @@ start_link() ->
 init([]) ->
     observer:start(),
 	%survivor:start(),
-    %testModule2:startNPipes(5),
+    testModule2:startNPipes(5),
     %testModule:start(),
     %testModule_tests:test(),
-    eunit:test(testModule2),
+    %eunit:test(testModule2),
     {ok, {{one_for_all, 0, 1}, []}}.
 
 %%====================================================================

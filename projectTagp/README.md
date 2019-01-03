@@ -51,4 +51,4 @@ Afterwards it adds a Heatexchanger to the system.
 This Heatexchanger influences the temperature of the system.
 The influence is tested.
 
-##PropEr Tests
+## PropEr Tests

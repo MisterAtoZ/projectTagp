@@ -1,6 +1,6 @@
 -module(testModule2).
 %-define(NOTEST, 1). %This line is to disable the testing for this module
-%-include_lib("eunit/include/eunit.hrl").
+-include_lib("eunit/include/eunit.hrl").
 
 -export([startSimpleTest/0]).
 -export([startNPipes/1]).
@@ -14,6 +14,7 @@
 
 startSimpleTest() ->
 	%This function makes a simple network with 3 pipes connected together
+	?debugFmt("Starten van de 1e functie",[]),
 	survivor:start(),
 	{ok, PipeTypePID} = resource_type:create(pipeTyp,[]),
 	{ok,Pipe1InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
@@ -41,6 +42,7 @@ startSimpleTest() ->
 	{ok, {Pipe1InstPID, Pipes, Connectors, Locations}}.
 
 startNPipes(N) ->
+	?debugFmt("Starten van de 2e functie",[]),
 	%This function strives to:
 	%1) Create N pipe instances
 	%2) Create a network containing all N pipes, connecting them in a circle
@@ -58,6 +60,7 @@ startNPipes(N) ->
 	{ok, {PipeTypePID, Pipes, Connectors, Locations}}.
 
 startSimpleTestFluidum() ->
+	?debugFmt("Starten van de 3e functie",[]),
 	%This function makes a simple network with 3 pipes connected together
 	%Afterwards it fill it up with water
 	survivor:start(),
@@ -92,6 +95,7 @@ startSimpleTestFluidum() ->
 	{ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum}}.
 
 startSimpleTestFluidumPump() ->
+	?debugFmt("Starten van de 4e functie",[]),
 	%This function makes a simple network with 3 pipes connected together
 	%Add a pump and
 	%Afterwards it fill it up with water
@@ -131,6 +135,7 @@ startSimpleTestFluidumPump() ->
 	{ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst}}.
 
 startSimpleTestFluidumPumpFlowMeter() ->
+	?debugFmt("Starten van de 5e functie",[]),
 	%This function makes a simple network with 3 pipes connected together
 	%Add a pump and
 	%Afterwards it fill it up with water and add a Flowmeter
@@ -180,6 +185,7 @@ startSimpleTestFluidumPumpFlowMeter() ->
 	{ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst, FlowMeterTypePID, FlowMeterInst}}.
 
 startSimpleTestFluidumPumpFlowMeterHeatEx() ->
+	?debugFmt("Starten van de 6e functie",[]),
 	%This function makes a simple network with 3 pipes connected together
 	%Add a pump and
 	%Afterwards it fill it up with water and add a Flowmeter and heatexchanger
@@ -237,8 +243,8 @@ startSimpleTestFluidumPumpFlowMeterHeatEx() ->
 	{ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fluidum, PumpTypePID, PumpInst, FlowMeterTypePID, FlowMeterInst, HeatExTypePID, HeatExInst}}.
 
 stop() ->
+	?debugFmt("dikke nest die shtoppe in originele file",[]),
 	survivor ! stop,
-	%survivor:delete(),
 	{ok, stopped}.
 
 %===========================================================================================
