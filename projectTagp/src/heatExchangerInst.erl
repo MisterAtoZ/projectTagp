@@ -16,7 +16,7 @@ init(Host, HeatExchangerTyp_Pid, PipeInst_Pid, HE_link_spec) ->
 
 
 temp_influence(HeatExchangerInst_Pid) -> 
-	msg:get(HeatExchangerInst_Pid, get_temp_influence).
+	msg:get(HeatExchangerInst_Pid, get_temp_influence). 
 
 
 loop(Host, State, HeatExchangerTyp_Pid, PipeInst_Pid, HE_link_spec) -> 

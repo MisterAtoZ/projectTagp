@@ -2,7 +2,7 @@
 -export([create/0, init/0]).
 
 
-create() -> {ok, spawn(?MODULE, init, [])}.
+create() -> {ok, spawn(?MODULE, init, [])}. 
 
 init() -> 
 	survivor:entry(heatExchangerTyp_created),

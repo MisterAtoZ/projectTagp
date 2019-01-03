@@ -7,7 +7,7 @@
 % of the link. 
 
 
-get_temp_influence(HE_link_spec) ->
+get_temp_influence(HE_link_spec) -> 
 	{ok, fun(Flow, InTemp) -> #{delta := Difference} = HE_link_spec, {ok, InTemp + (Difference/Flow)} end}.
 
 
