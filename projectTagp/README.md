@@ -44,3 +44,11 @@ This pump is tested on shutting it on and off and the flow through the system.
 This function first does the same as startSimpleTestFluidumPump().
 Afterwards it adds a flowmeter to the system.
 This flowmeter gives a measure flow and an estimated flow. These are not tested propperly yet.
+
+#### Test startSimpleTestFluidumPumpFlowMeterHeatEx() in testModule2
+This function does the same as startSimpleTestFluidumPumpFlowMeter().
+Afterwards it adds a Heatexchanger to the system.
+This Heatexchanger influences the temperature of the system.
+The influence is tested.
+
+##PropEr Tests
