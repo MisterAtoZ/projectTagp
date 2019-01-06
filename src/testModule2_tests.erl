@@ -52,6 +52,7 @@ startSimpleTestFluidumPump_test_() ->
         fun stop/1,
         fun({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst}) ->
             [
+                checkFluidumFunctions({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst}),
                 checkPipesWithFluidumPump({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst}),
                 checkPumpFunctions({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst}),
                 checkPumpFlowInfluence({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst})
@@ -67,6 +68,7 @@ startSimpleTestFluidumPumpFlowMeter_test_() ->
         fun({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst, FlowMeterTypePID, FlowMeterInst}) ->
             [
                 %The same as the previous testbuild are done for completion
+                checkFluidumFunctions({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst}),
                 checkPipesWithFluidumPump({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst}), 
                 checkPumpFunctions({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst}),
                 checkPumpFlowInfluence({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst}),
@@ -84,6 +86,7 @@ startSimpleTestFluidumPumpFlowMeterHeatEx_test_() ->
         fun({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst, FlowMeterTypePID, FlowMeterInst, HeatExTypePID, HeatExInst}) ->
             [
                 %The same tests as in previous testbuilds, these are done for completion
+                checkFluidumFunctions({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst}),
                 checkPipesWithFluidumPump({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst}),
                 checkPumpFunctions({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst}),
                 checkPumpFlowInfluence({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst}),
@@ -230,9 +233,10 @@ checkFluidumFunctions({_PipeTypePID,Pipes,_Connectors, Locations, FluidumTyp, Fl
     %The function finds all the used pipes
     %It needs to be compared to what the pipes should look like
     %This function is made, so that the order of the pipes is: pipe1, pipe2, pipe3
-    CircuitCompator = [Pipe1, Pipe2, Pipe3],
-    ?debugFmt("The circuit looks like: ~p",[GetCircuit]),
-    TestGetCircuit = ?_assertEqual(CircuitCompator, GetCircuit),
+    CircuitComporator = [Pipe1, Pipe2, Pipe3],
+    TestGetCircuit = ?_assertEqual(CircuitComporator, GetCircuit),
+    %This test is not going to work because the CircuitComporator being a list and GetCircuit being a map
+    %There for the map should be converted to a list or the list to a map
 
     [TestGetLocations, TestGetType, TestGetCircuit].
 
@@ -364,3 +368,7 @@ checkHeatEx({_PipeTypePID,_Pipes,_Connectors,_Locations,_FluidumTyp,_Fluidum,_Pu
 %HELP FUNCTIONS
 %===========================================================================================
 
+% circuitMapToList(MapCircuit) ->
+%     circuitMaptoList(MapCircuit, []).
+
+% circuitMapToList(MapCircuit, ListCircuit) ->

@@ -21,6 +21,9 @@ prop_testFlowInfluence() ->
     %testModule2:stop(),
     Tests.
 
+prop_testVoorLaurens() ->
+    ?EXISTS(Integer,integer(0,10),(Integer rem 2) /= 0).
+
 boolean(_) -> true.
 
 testFlowInfluence(Flow)->
@@ -30,6 +33,4 @@ testFlowInfluence(Flow)->
     Influence = InfluenceFunction(Flow),
     InfluenceRef = 250 - 5*Flow-2*Flow*Flow,
     Influence == InfluenceRef.
-
-
 
