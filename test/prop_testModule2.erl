@@ -9,12 +9,17 @@ prop_test() ->
 
 prop_testFlowInfluence() ->
 
-    %TO DO dat alleen hier de survivor wordt gestart en gestopt    
+    %Because starting and stopping the survivor a lot of times can cause a crash.
+    %The survivor gets started only once here and all the pipes,... get put in one table.    
+    %testModule2:startSurvivor(),
+    survivor2:start(),
+    Tests = ?FORALL(Flow, integer(0,1000),testFlowInfluence(Flow)),
 
-    ?FORALL(Flow, integer(0,1000),testFlowInfluence(Flow)).
-
-% prop_testSurvivor() ->
-%     ?FORALL(L, integer(0,4711), testSurvivor()).
+    %The survivor cannot be stopped immediatly
+    %therefor the timer is used to delay the stop with a second
+    timer:send_after(1000, survivor, stop),
+    %testModule2:stop(),
+    Tests.
 
 boolean(_) -> true.
 
@@ -24,9 +29,6 @@ testFlowInfluence(Flow)->
     {ok, InfluenceFunction} = pumpInst:flow_influence(PumpInst),
     Influence = InfluenceFunction(Flow),
     InfluenceRef = 250 - 5*Flow-2*Flow*Flow,
-    %testModule2:stop(),
-    %survivor ! stop,
-    timer:send_after(1000, survivor, stop),
     Influence == InfluenceRef.
 
 

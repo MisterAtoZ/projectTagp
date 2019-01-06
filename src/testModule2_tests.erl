@@ -100,6 +100,7 @@ startSimpleTestFluidumPumpFlowMeterHeatEx_test_() ->
 
 %The processes need to be started/stopped, this happens here
 return_startSimpleTest() ->
+    testModule2:startSurvivor(),
     {ok, {PipeTypePID, Pipes, Connectors, Locations}} = testModule2:startSimpleTest(),
     {PipeTypePID, Pipes, Connectors, Locations}.
 
@@ -108,23 +109,28 @@ stop(_) ->
     testModule2:stop().
 
 return_startNPipes() ->
+    testModule2:startSurvivor(),
     N = 5, %Has to be atleast 3! 
     {ok, {PipeTypePID, Pipes, Connectors, Location}} = testModule2:startNPipes(N),
     {PipeTypePID, Pipes, Connectors, Location, N}.
 
 return_startSimpleTestFluidum() ->
+    testModule2:startSurvivor(),
     {ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst}} = testModule2:startSimpleTestFluidum(),
     {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst}.
 
 return_startSimpleTestFluidumPump() ->
+    testModule2:startSurvivor(),
     {ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst}} = testModule2:startSimpleTestFluidumPump(),
     {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst}.
 
 return_startSimpleTestFluidumPumpFlowMeter() ->
+    testModule2:startSurvivor(),
     {ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst, FlowMeterTypePID, FlowMeterInst}} = testModule2:startSimpleTestFluidumPumpFlowMeter(),
     {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst, FlowMeterTypePID, FlowMeterInst}.
 
 return_startSimpleTestFluidumPumpFlowMeterHeatEx() ->
+    testModule2:startSurvivor(),
     {ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst, FlowMeterTypePID, FlowMeterInst, HeatExTypePID, HeatExInst}} = testModule2:startSimpleTestFluidumPumpFlowMeterHeatEx(),
     {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst, FlowMeterTypePID, FlowMeterInst, HeatExTypePID, HeatExInst}.
 

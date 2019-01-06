@@ -10,13 +10,13 @@
 -export([startSimpleTestFluidumPumpFlowMeterHeatEx/0]).
 -export([makePipes/3]).
 -export([connectPipes/1]).
--export([stop/0, getAllConnectors/1]).
+-export([stop/0, startSurvivor/0, getAllConnectors/1]).
 
 startSimpleTest() ->
 	%This function makes a simple network with 3 pipes connected together
 	?debugFmt("Starten van de 1e functie",[]),
 	%survivor:start(),
-	survivor2:start(),
+	%survivor2:start(),
 	{ok, PipeTypePID} = resource_type:create(pipeTyp,[]),
 	{ok,Pipe1InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
 	{ok,Pipe2InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
@@ -48,7 +48,7 @@ startNPipes(N) ->
 	%1) Create N pipe instances
 	%2) Create a network containing all N pipes, connecting them in a circle
 	%survivor:start(),
-	survivor2:start(),
+	%survivor2:start(),
 	{ok,PipeTypePID} = resource_type:create(pipeTyp,[]),
 	Pipes = makePipes(N,[], PipeTypePID),
 	io:format("~p pipes are made ~n", [N]),
@@ -66,7 +66,7 @@ startSimpleTestFluidum() ->
 	%This function makes a simple network with 3 pipes connected together
 	%Afterwards it fill it up with water
 	%survivor:start(),
-	survivor2:start(),
+	%survivor2:start(),
 	{ok, PipeTypePID} = resource_type:create(pipeTyp,[]),
 	{ok,Pipe1InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
 	{ok,Pipe2InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
@@ -103,7 +103,7 @@ startSimpleTestFluidumPump() ->
 	%Add a pump and
 	%Afterwards it fill it up with water
 	%survivor:start(),
-	survivor2:start(),
+	%survivor2:start(),
 	{ok, PipeTypePID} = resource_type:create(pipeTyp,[]),
 	{ok,Pipe1InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
 	{ok,Pipe2InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
@@ -145,7 +145,7 @@ startSimpleTestFluidumPumpFlowMeter() ->
 	%Afterwards it fill it up with water and add a Flowmeter
 	%
 	%survivor:start(),
-	survivor2:start(),
+	%survivor2:start(),
 	{ok, PipeTypePID} = resource_type:create(pipeTyp,[]),
 	{ok,Pipe1InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
 	{ok,Pipe2InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
@@ -196,7 +196,7 @@ startSimpleTestFluidumPumpFlowMeterHeatEx() ->
 	%Afterwards it fill it up with water and add a Flowmeter and heatexchanger
 	%
 	%survivor2:start(),
-	survivor:start(),
+	%survivor:start(),
 	{ok, PipeTypePID} = resource_type:create(pipeTyp,[]),
 	{ok,Pipe1InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
 	{ok,Pipe2InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
@@ -252,6 +252,10 @@ stop() ->
 	?debugFmt("Stoppen in originele file",[]),
 	survivor ! stop,
 	{ok, stopped}.
+
+startSurvivor() ->
+	survivor2:start(),
+	{ok, started}.
 
 %===========================================================================================
 %HELP FUNCTIONS
