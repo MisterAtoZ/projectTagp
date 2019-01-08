@@ -36,13 +36,13 @@ startNPipesPPumpsOFlowMetersMHeatex(N, P, O, M) ->
 %    {ok, {Pipes, FluidumInst, Pumps}}.
 
     %Adding the flowmeters
-	% {ok, FlowMeterTypePID} = flowMeterTyp:create(),
-    % io:format("de vrije pijpen voor de flowmeter zijn: ~p ~n", [PipesFreeAfterPumps]),
-    % {ok, {FlowMeters, PipesFreeAfterFlowMeters}} = makeFlowMeters(O, [], FlowMeterTypePID, PipesFreeAfterPumps),
+	{ok, FlowMeterTypePID} = flowMeterTyp:create(),
+    io:format("de vrije pijpen voor de flowmeter zijn: ~p ~n", [PipesFreeAfterPumps]),
+    {ok, {FlowMeters, PipesFreeAfterFlowMeters}} = makeFlowMeters(O, [], FlowMeterTypePID, PipesFreeAfterPumps),
     % [Pijpke | Other] = PipesFreeAfterPumps,
     % RealWorldCmdFnFlowMeter = fun() ->	{ok, real_flow} end,
     % {ok, FlowMeters} = flowMeterInst:create(self(), FlowMeterTypePID, Pijpke, RealWorldCmdFnFlowMeter),
-    %io:format("de flowmeters zitten op ~p en de pijpen die over zijn zijn: ~p ~n", [FlowMeters, PipesFreeAfterFlowMeters]),
+    io:format("de flowmeters zitten op ~p en de pijpen die over zijn zijn: ~p ~n", [FlowMeters, PipesFreeAfterFlowMeters]),
     %{ok,{FlowMeterList ++[FlowMeterInst], PipesNotUsed}};
 
     %{ok, {Pipes, FluidumInst, Pumps, FlowMeters}}.
@@ -52,69 +52,10 @@ startNPipesPPumpsOFlowMetersMHeatex(N, P, O, M) ->
 	%To make the heatexchanger, folowing parameters are necessary: Host, HeatExchangerTyp_Pid, PipeInst_Pid, HE_link_spec
 	Difference = 1,
 
-	{ok, {HeatExchangers, PipesFreeAfterHeatEx}} = makeHeatExchangers(M, [], HeatExTypePID, PipesFreeAfterPumps, Difference),
+	{ok, {HeatExchangers, PipesFreeAfterHeatEx}} = makeHeatExchangers(M, [], HeatExTypePID, PipesFreeAfterFlowMeters, Difference),
     io:format("The Heatexchangers are: ~p~n", [HeatExchangers]),
 
-    {ok, {Pipes, FluidumInst, Pumps, HeatExchangers}}.
-
-% startSimpleTestFluidumPumpFlowMeterHeatEx() ->
-% 	%?debugFmt("Starten van de 6e functie",[]),
-% 	%This function makes a simple network with 3 pipes connected together
-% 	%Add a pump and
-% 	%Afterwards it fill it up with water and add a Flowmeter and heatexchanger
-% 	%
-% 	%survivor2:start(),
-% 	%survivor:start(),
-% 	{ok, PipeTypePID} = resource_type:create(pipeTyp,[]),
-% 	{ok,Pipe1InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
-% 	{ok,Pipe2InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
-% 	{ok,Pipe3InstPID} = resource_instance:create(pipeInst,[self(),PipeTypePID]),
-% 	{ok,[P1C1,P1C2]} = resource_instance:list_connectors(Pipe1InstPID),
-% 	{ok,[P2C1,P2C2]} = resource_instance:list_connectors(Pipe2InstPID),
-% 	{ok,[P3C1,P3C2]} = resource_instance:list_connectors(Pipe3InstPID),
-
-% 	connector:connect(P2C2,P3C1),
-% 	connector:connect(P1C1,P3C2),
-% 	connector:connect(P1C2,P2C1),
-
-% 	%Create the pumpType
-% 	{ok, PumpTypePID} = pumpTyp:create(), %Need to creat a pumpType, not a resource_type!
-
-% 	RealWorldCmdFnPump = fun(on) -> %Local function
-% 						{ok,on};
-% 					(off) ->
-% 						{ok,off}
-% 					end,
-
-% 	%PumpInst is the actual pump
-% 	%to create the PumpInst, the Host, PumpTyp_Pid, PipeInst_Pid, RealWorldCmdFn are needed
-% 	{ok,PumpInst} = pumpInst:create(self(), PumpTypePID, Pipe1InstPID, RealWorldCmdFnPump),
-
-% 	Pipes = [Pipe1InstPID, Pipe2InstPID, Pipe3InstPID],
-% 	Connectors = getAllConnectors(Pipes),
-% 	Locations = getAllLocations(Pipes),
-
-% 	%Adding the fluidum to the just created network
-% 	FluidumTyp = fluidumTyp:create(),
-% 	{ok, FluidumInst} = fluidumInst:create(P1C1, FluidumTyp), %as rootConnector is chosen for P1C1
-
-% 	%Adding the flowmeter
-% 	{ok, FlowMeterTypePID} = flowMeterTyp:create(),
-
-% 	%To make the flowmeter, these parameters are needed: Host, FlowMeterTyp_Pid, ResInst_Pid, RealWorldCmdFn
-% 	RealWorldCmdFnFlowMeter = fun() ->	{ok, real_flow} end,
-
-% 	{ok, FlowMeterInst} = flowMeterInst:create(self(), FlowMeterTypePID, Pipe2InstPID, RealWorldCmdFnFlowMeter),
-
-% 	%Adding the HeatExchanger
-% 	{ok, HeatExTypePID} = heatExchangerTyp:create(),
-% 	%To make the heatexchanger, folowing parameters are necessary: Host, HeatExchangerTyp_Pid, PipeInst_Pid, HE_link_spec
-% 	Difference = 1,
-% 	HE_link_spec = #{delta => Difference},
-
-% 	{ok, HeatExInst} = heatExchangerInst:create(self(), HeatExTypePID, Pipe3InstPID, HE_link_spec),
-
-% 	{ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst, FlowMeterTypePID, FlowMeterInst, HeatExTypePID, HeatExInst}}.
+    {ok, {Pipes, FluidumInst, Pumps, FlowMeters, HeatExchangers}}.
 
 
 stop() ->
