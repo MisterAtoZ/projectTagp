@@ -1,6 +1,7 @@
 -module(digitalTwin).
 -export([startNPipesPPumpsOFlowMetersMHeatex/4]).
 -export([makePipes/3, makePumps/4, makeFlowMeters/4]).
+-export([makeHeatExchangers/5]).
 -export([connectPipes/1]).
 -export([stop/0, startSurvivor/0, getAllConnectors/1]).
 
@@ -31,20 +32,30 @@ startNPipesPPumpsOFlowMetersMHeatex(N, P, O, M) ->
 	%Now all the pumps will be made
     {ok, PumpTypePID} = pumpTyp:create(),
     {ok, {Pumps, PipesFreeAfterPumps}} = makePumps(P, [], PumpTypePID, Pipes),
-
+    io:format("this are the pipes free after pumps: ~p~n", [PipesFreeAfterPumps]),
 %    {ok, {Pipes, FluidumInst, Pumps}}.
 
     %Adding the flowmeters
-	{ok, FlowMeterTypePID} = flowMeterTyp:create(),
-    io:format("de vrije pijpen voor de flowmeter zijn: ~p ~n", [PipesFreeAfterPumps]),
-    {ok, {FlowMeters, PipesFreeAfterFlowMeters}} = makeFlowMeters(O, [], FlowMeterTypePID, PipesFreeAfterPumps),
+	% {ok, FlowMeterTypePID} = flowMeterTyp:create(),
+    % io:format("de vrije pijpen voor de flowmeter zijn: ~p ~n", [PipesFreeAfterPumps]),
+    % {ok, {FlowMeters, PipesFreeAfterFlowMeters}} = makeFlowMeters(O, [], FlowMeterTypePID, PipesFreeAfterPumps),
     % [Pijpke | Other] = PipesFreeAfterPumps,
     % RealWorldCmdFnFlowMeter = fun() ->	{ok, real_flow} end,
     % {ok, FlowMeters} = flowMeterInst:create(self(), FlowMeterTypePID, Pijpke, RealWorldCmdFnFlowMeter),
     %io:format("de flowmeters zitten op ~p en de pijpen die over zijn zijn: ~p ~n", [FlowMeters, PipesFreeAfterFlowMeters]),
     %{ok,{FlowMeterList ++[FlowMeterInst], PipesNotUsed}};
 
-    {ok, {Pipes, FluidumInst, Pumps, FlowMeters}}.
+    %{ok, {Pipes, FluidumInst, Pumps, FlowMeters}}.
+
+	%Adding the HeatExchanger
+	{ok, HeatExTypePID} = heatExchangerTyp:create(),
+	%To make the heatexchanger, folowing parameters are necessary: Host, HeatExchangerTyp_Pid, PipeInst_Pid, HE_link_spec
+	Difference = 1,
+
+	{ok, {HeatExchangers, PipesFreeAfterHeatEx}} = makeHeatExchangers(M, [], HeatExTypePID, PipesFreeAfterPumps, Difference),
+    io:format("The Heatexchangers are: ~p~n", [HeatExchangers]),
+
+    {ok, {Pipes, FluidumInst, Pumps, HeatExchangers}}.
 
 % startSimpleTestFluidumPumpFlowMeterHeatEx() ->
 % 	%?debugFmt("Starten van de 6e functie",[]),
@@ -288,3 +299,25 @@ makeFlowMeters(O, FlowMeterList, FlowMeterTypePID, Pipes) ->
 % 		io:format("O has a negative value!~n"),
 % 	 	{error, "O has a negative value"}
 % 	end.
+
+
+makeHeatExchangers(1, HeatExList, HeatExTypePID, Pipes, Difference) ->
+    HE_link_spec = #{delta => Difference},
+    {PipesHeatExList, PipesNotUsed} = lists:split(1,Pipes),
+    io:format("the used pipe is is ~p ~n", [PipesHeatExList]),
+	{ok,HeatExInst} = heatExchangerInst:create(self(), HeatExTypePID, PipesHeatExList, HE_link_spec),
+    {ok,{HeatExList ++[HeatExInst], PipesNotUsed}};
+
+makeHeatExchangers(M, HeatExList, HeatExTypePID, Pipes, Difference) ->
+	if M > 1 ->
+        HE_link_spec = #{delta => Difference},
+        {PipesHeatExList, PipesNotUsed} = lists:split(1,Pipes),
+        io:format("the used pipe is ~p ~n", [PipesHeatExList]),
+        {ok,HeatExInst} = heatExchangerInst:create(self(), HeatExTypePID, PipesHeatExList, HE_link_spec),
+        NewHeatExList = HeatExList ++[HeatExInst],
+        M2 = M-1,
+        makeHeatExchangers(M2, NewHeatExList, HeatExTypePID, PipesNotUsed, Difference);
+	 true ->
+		io:format("M has a negative value!~n"),
+	 	{error, "M has a negative value"}
+	end.
