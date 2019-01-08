@@ -37,8 +37,13 @@ init([]) ->
     %testModule:start(),
     %testModule_tests:test(),
     %eunit:test(testModule2),
-    testModule2:startSurvivor(),
-    testModule2:startSimpleTestFluidumPump(),
+    %testModule2:startSurvivor(),
+    %testModule2:startSimpleTestFluidumPump(),
+    digitalTwin:startSurvivor(),
+    %testModule2:startSimpleTestFluidumPumpFlowMeter(),
+    digitalTwin:startNPipesPPumpsOFlowMetersMHeatex(8, 3, 2, 1),
+    % {ok, FlowMeterTypePID} = flowMeterTyp:create(),
+    % digitalTwin:makeFlowMeters(2, [], FlowMeterTypePID, Pipes),
     {ok, {{one_for_all, 0, 1}, []}}.
 
 %%====================================================================
