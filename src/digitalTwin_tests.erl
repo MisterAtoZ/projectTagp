@@ -14,6 +14,7 @@ startNPipesPPumpsOFlowMetersMHeatex_test_() ->
         fun({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeters, HeatExchangers, N, P, O, M}) ->
             [
                 checkTypesAreAliveAndListsHaveCorrectLength({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeters, HeatExchangers, N, P, O, M}),
+                checkAllPipesInst({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeters, HeatExchangers, N, P, O, M}),
                 checkAllPumpInst({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeters, HeatExchangers, N, P, O, M})
             ]
         end
@@ -85,9 +86,28 @@ checkTypesAreAliveAndListsHaveCorrectLength({Types, Pipes, Connectors, Locations
     ].
 
 %--------------------------------------------------------------------------------------------------------------------------------
+%Tests of the pipeInsts
+
+checkAllPipesInst({_Types, Pipes, Connectors, Locations,_FluidumInst,_Pumps,_FlowMeters,_HeatExchangers, N,_P,_O,_M}) ->
+    Q = length(Pipes),
+    checkAllPipesInst(Q, Pipes, Connectors, Locations, []).
+
+checkAllPipesInst(1, PipesToDo, ConnectorsToDo, LocationsToDo, TestsPipeInst) ->
+    [CheckPipeInst | _ToDoPipes] = PipesToDo,
+
+    NewTestsPumpInst = [TestsPipeInst | ?_assert(erlang:is_process_alive(CheckPipeInst))],
+    NewTestsPumpInst;
+
+checkAllPipesInst(Q, PipesToDo, ConnectorsToDo, LocationsToDo, TestsPipeInst) ->
+    [CheckPipeInst | ToDoPipes] = PipesToDo,
+
+    NewTestsPumpInst = [TestsPipeInst | ?_assert(erlang:is_process_alive(CheckPipeInst))],
+    checkAllPipesInst(Q-1, ToDoPipes, ConnectorsToDo, LocationsToDo, NewTestsPumpInst).
+
+%--------------------------------------------------------------------------------------------------------------------------------
 %Tests of the pumpInsts
 
-checkAllPumpInst({Types,_Pipes,_Connectors,_Locations,_FluidumInst, Pumps,_FlowMeters,_HeatExchangers,_N, P,_O,_M}) ->
+checkAllPumpInst({_Types,_Pipes,_Connectors,_Locations,_FluidumInst, Pumps,_FlowMeters,_HeatExchangers,_N, P,_O,_M}) ->
     Q = length(Pumps),
     checkAllPumpInst(Q, Pumps, []).
 
