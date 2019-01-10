@@ -1,6 +1,6 @@
 -module(voorbeeldeunit).
 -export([fib/1]).
-%-define(NOTEST, 1). %This line is to disable the testing for this module
+-define(NOTEST, 1). %This line is to disable the testing for this module
 -include_lib("eunit/include/eunit.hrl").
 
 fib(0) -> 1;

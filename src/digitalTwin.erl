@@ -37,14 +37,15 @@ startNPipesPPumpsOFlowMetersMHeatex(N, P, O, M) ->
 
     %Adding the flowmeters
 	{ok, FlowMeterTypePID} = flowMeterTyp:create(),
-    io:format("de vrije pijpen voor de flowmeter zijn: ~p ~n", [PipesFreeAfterPumps]),
-    {ok, {FlowMeters, PipesFreeAfterFlowMeters}} = makeFlowMeters(O, [], FlowMeterTypePID, PipesFreeAfterPumps),
+    % io:format("de vrije pijpen voor de flowmeter zijn: ~p ~n", [PipesFreeAfterPumps]),
+    % {ok, {FlowMeters, PipesFreeAfterFlowMeters}} = makeFlowMeters(O, [], FlowMeterTypePID, PipesFreeAfterPumps),
     % [Pijpke | Other] = PipesFreeAfterPumps,
     % RealWorldCmdFnFlowMeter = fun() ->	{ok, real_flow} end,
     % {ok, FlowMeters} = flowMeterInst:create(self(), FlowMeterTypePID, Pijpke, RealWorldCmdFnFlowMeter),
-    io:format("de flowmeters zitten op ~p en de pijpen die over zijn zijn: ~p ~n", [FlowMeters, PipesFreeAfterFlowMeters]),
+    %io:format("de flowmeters zitten op ~p en de pijpen die over zijn zijn: ~p ~n", [FlowMeters, PipesFreeAfterFlowMeters]),
     %{ok,{FlowMeterList ++[FlowMeterInst], PipesNotUsed}};
 
+	FlowMeters = [],
     %{ok, {Pipes, FluidumInst, Pumps, FlowMeters}}.
 
 	%Adding the HeatExchanger
@@ -52,10 +53,12 @@ startNPipesPPumpsOFlowMetersMHeatex(N, P, O, M) ->
 	%To make the heatexchanger, folowing parameters are necessary: Host, HeatExchangerTyp_Pid, PipeInst_Pid, HE_link_spec
 	Difference = 1,
 
-	{ok, {HeatExchangers, PipesFreeAfterHeatEx}} = makeHeatExchangers(M, [], HeatExTypePID, PipesFreeAfterFlowMeters, Difference),
+	{ok, {HeatExchangers, PipesFreeAfterHeatEx}} = makeHeatExchangers(M, [], HeatExTypePID, PipesFreeAfterPumps, Difference), %AANPASSEN NA TOEVOEGEN FLOWMETER!!
     io:format("The Heatexchangers are: ~p~n", [HeatExchangers]),
 
-    {ok, {Pipes, FluidumInst, Pumps, FlowMeters, HeatExchangers}}.
+	Types = [PipeTypePID, FluidumType, PumpTypePID, FlowMeterTypePID, HeatExTypePID],
+
+    {ok, {Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeters, HeatExchangers}}.
 
 
 stop() ->
