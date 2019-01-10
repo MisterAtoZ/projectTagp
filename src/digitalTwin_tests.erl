@@ -45,43 +45,22 @@ stop(_) ->
 checkTypesAreAliveAndListsHaveCorrectLength({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeters, HeatExchangers, N, P, O, M}) ->
     %Only the first three pipes get checked if they really exist, if they are okay, the rest will also be good
     [PipeTypePID, FluidumType, PumpTypePID, FlowMeterTypePID, HeatExTypePID] = Types,
-
-    % [Pipe1, Pipe2, Pipe3|_RestPipes] = Pipes,
-    % [C11,C12,C21,C22,C31,C32|_RestConnectors] = Connectors,
-    % [Location1, Location2, Location3|_RestLocations] = Locations,
-
-    % %Check all the PumpInsts
-    % Q = length(Pumps),
-    % {ok, TestsPumpInst} = checkAllPumps(Q, Pumps, []),
-    %Check if the processes of the first three pipes are running
-    %If all the tests pass, all the processes are running
     [
-        %All the alive tests for pipes
+        %Test if all the Types are alive
         ?_assert(erlang:is_process_alive(PipeTypePID)),
         ?_assert(erlang:is_process_alive(FluidumType)),
         ?_assert(erlang:is_process_alive(PumpTypePID)),
         ?_assert(erlang:is_process_alive(FlowMeterTypePID)),
         ?_assert(erlang:is_process_alive(HeatExTypePID)),
-        % ?_assert(erlang:is_process_alive(Pipe1)),
-        % ?_assert(erlang:is_process_alive(Pipe2)),
-        % ?_assert(erlang:is_process_alive(Pipe3)),
-        % ?_assert(erlang:is_process_alive(C11)),
-        % ?_assert(erlang:is_process_alive(C12)),
-        % ?_assert(erlang:is_process_alive(C21)),
-        % ?_assert(erlang:is_process_alive(C22)),
-        % ?_assert(erlang:is_process_alive(C31)),
-        % ?_assert(erlang:is_process_alive(C32)),
-        % ?_assert(erlang:is_process_alive(Location1)),
-        % ?_assert(erlang:is_process_alive(Location2)),
-        % ?_assert(erlang:is_process_alive(Location3)),
-        ?_assertEqual(N, length(Pipes)), %these should be the same
-        ?_assertEqual(2*N, length(Connectors)), %there are 2 connectors per pipe
-        ?_assertEqual(N, length(Locations)),
         %All the alive tests for fluidum
         ?_assert(erlang:is_process_alive(FluidumType)),
         ?_assert(erlang:is_process_alive(FluidumInst)),
+        %Test if the lengts of the lists are the same as the given number
+        ?_assertEqual(N, length(Pipes)),
+        ?_assertEqual(2*N, length(Connectors)), %there are 2 connectors per pipe
+        ?_assertEqual(N, length(Locations)),
         ?_assertEqual(P, length(Pumps)),
-        %?_assertEqual(O, length(FlowMeters)), %Flowmeters are not working yet
+        %?_assertEqual(O, length(FlowMeters)), %Flowmeters are not working correct yet
         ?_assertEqual(M, length(HeatExchangers))
     ].
 
@@ -94,15 +73,27 @@ checkAllPipesInst({_Types, Pipes, Connectors, Locations,_FluidumInst,_Pumps,_Flo
 
 checkAllPipesInst(1, PipesToDo, ConnectorsToDo, LocationsToDo, TestsPipeInst) ->
     [CheckPipeInst | _ToDoPipes] = PipesToDo,
+    [C1, C2 | _ToDoConnectors] = ConnectorsToDo,
+    [L1 | _ToDoLocations] = LocationsToDo,
 
-    NewTestsPumpInst = [TestsPipeInst | ?_assert(erlang:is_process_alive(CheckPipeInst))],
-    NewTestsPumpInst;
+    NewTestsPipeInst = [TestsPipeInst | ?_assert(erlang:is_process_alive(CheckPipeInst))],
+    NewTestsPipeInst2 = [NewTestsPipeInst | ?_assert(erlang:is_process_alive(C1))],
+    NewTestsPipeInst3 = [NewTestsPipeInst2 | ?_assert(erlang:is_process_alive(C2))],
+    NewTestsPipeInst4 = [NewTestsPipeInst3 | ?_assert(erlang:is_process_alive(L1))],
+
+    NewTestsPipeInst4;
 
 checkAllPipesInst(Q, PipesToDo, ConnectorsToDo, LocationsToDo, TestsPipeInst) ->
     [CheckPipeInst | ToDoPipes] = PipesToDo,
+    [C1, C2 | ToDoConnectors] = ConnectorsToDo,
+    [L1 | ToDoLocations] = LocationsToDo,
 
-    NewTestsPumpInst = [TestsPipeInst | ?_assert(erlang:is_process_alive(CheckPipeInst))],
-    checkAllPipesInst(Q-1, ToDoPipes, ConnectorsToDo, LocationsToDo, NewTestsPumpInst).
+    NewTestsPipeInst = [TestsPipeInst | ?_assert(erlang:is_process_alive(CheckPipeInst))],
+    NewTestsPipeInst2 = [NewTestsPipeInst | ?_assert(erlang:is_process_alive(C1))],
+    NewTestsPipeInst3 = [NewTestsPipeInst2 | ?_assert(erlang:is_process_alive(C2))],
+    NewTestsPipeInst4 = [NewTestsPipeInst3 | ?_assert(erlang:is_process_alive(L1))],
+
+    checkAllPipesInst(Q-1, ToDoPipes, ToDoConnectors, ToDoLocations, NewTestsPipeInst4).
 
 %--------------------------------------------------------------------------------------------------------------------------------
 %Tests of the pumpInsts

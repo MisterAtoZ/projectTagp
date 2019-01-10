@@ -230,11 +230,12 @@ checkFluidumFunctions({_PipeTypePID,Pipes,_Connectors, Locations, FluidumTyp, Fl
 
     %The last thing to test is: get_resource_circuit
     {ok, GetCircuit} = msg:get(FluidumInst, get_resource_circuit),
+    {ok, ResourceCircuit} = influence(maps:next(maps:iterator(GetCircuit)),[]),
     %The function finds all the used pipes
     %It needs to be compared to what the pipes should look like
     %This function is made, so that the order of the pipes is: pipe1, pipe2, pipe3
     CircuitComporator = [Pipe1, Pipe2, Pipe3],
-    TestGetCircuit = ?_assertEqual(CircuitComporator, GetCircuit),
+    TestGetCircuit = ?_assertEqual(CircuitComporator, ResourceCircuit),
     %This test is not going to work because the CircuitComporator being a list and GetCircuit being a map
     %There for the map should be converted to a list or the list to a map
 
@@ -372,3 +373,9 @@ checkHeatEx({_PipeTypePID,_Pipes,_Connectors,_Locations,_FluidumTyp,_Fluidum,_Pu
 %     circuitMaptoList(MapCircuit, []).
 
 % circuitMapToList(MapCircuit, ListCircuit) ->
+
+influence({C, _, Iter}, Acc) ->
+    {ok, InflFn} = apply(get_resource_instant, get_flow_influence, [C]),
+    influence(maps:next(Iter), [InflFn | Acc]);
+
+influence(none, Acc) -> {ok, Acc}.
