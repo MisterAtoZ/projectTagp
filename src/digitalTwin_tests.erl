@@ -95,6 +95,33 @@ checkAllPipesInst(Q, PipesToDo, ConnectorsToDo, LocationsToDo, TestsPipeInst) ->
 
     checkAllPipesInst(Q-1, ToDoPipes, ToDoConnectors, ToDoLocations, NewTestsPipeInst4).
 
+%-------------------------------------------------------------------------------------------------------------------------------
+%Tests of the fluidum
+
+checkFluidumFunctions({ Types, Pipes, Connectors, Locations, FluidumInst,_Pumps,_FlowMeters,_HeatExchangers, N,_P,_O,_M}) ->
+    [_, FluidumType, _, _, _] = Types,
+    %Testing function get_locations of fluidumInst 
+    %This can get done when sending the message get_locations
+    {ok, LocationsFluidum} = msg:get(FluidumInst,get_locations),
+    TestGetLocations = ?_assertEqual(LocationsFluidum, []),
+
+    %Test the get_type message
+    {ok, GetType} = msg:get(FluidumInst,get_type),
+    TestGetType = ?_assertEqual(GetType,FluidumType),
+
+    %The next thing to test is: get_resource_circuit
+    {ok, GetCircuit} = msg:get(FluidumInst, get_resource_circuit),
+    %This function tests if the pipe is in the map and returns the tests
+    FluidumTests = check_resourceCircuit(Pipes, GetCircuit),
+    
+    %The last thing to test for fluidum is: discover_circuit
+    [CRoot|_] = Connectors,
+    {ok, {C1, DiscoveredCirvuit}} = fluidumTyp:discover_circuit(CRoot),
+    FluidumDiscoverTests = check_resourceCircuit(Connectors, DiscoveredCirvuit),
+    ConnectorTest = ?_assertEqual(C1, CRoot),
+
+    [TestGetLocations, TestGetType, FluidumTests, FluidumDiscoverTests, ConnectorTest].
+
 %--------------------------------------------------------------------------------------------------------------------------------
 %Tests of the pumpInsts
 

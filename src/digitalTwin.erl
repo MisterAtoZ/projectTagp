@@ -1,65 +1,68 @@
 -module(digitalTwin).
--export([startNPipesPPumpsOFlowMetersMHeatex/4]).
--export([makePipes/3, makePumps/4, makeFlowMeters/4]).
+-export([startNPipesPPumpsOFlowMetersMHeatex/3]).
+-export([makePipes/3, makePumps/4]).
 -export([makeHeatExchangers/5]).
 -export([connectPipes/1]).
 -export([stop/0, startSurvivor/0, getAllConnectors/1]).
 
 
-startNPipesPPumpsOFlowMetersMHeatex(N, P, O, M) ->
+startNPipesPPumpsOFlowMetersMHeatex(N, P, M) ->
 	
 	%This function strives to:
 	%1) Create N pipe instances
 	%2) Create a network containing all N pipes, connecting them in a circle
-	%survivor:start(),
-	%survivor2:start(),
-    %checkIfSystemPossible(N, P, O, M), %To Do
-	{ok,PipeTypePID} = resource_type:create(pipeTyp,[]),
-	Pipes = makePipes(N,[], PipeTypePID),
-	io:format("~p pipes are made ~n", [N]),
-	%now all pipes are made, the need to be connected together
-	%All pipes in the list are connected with the one behind and in front of it
-	%The last and first pipe in the list are also connected
-	connectPipes(Pipes),
-	Connectors = getAllConnectors(Pipes),
-	Locations = getAllLocations(Pipes),
+	
+    %First it is checked that there are enough pipes to support the system
+	if N < P+1+M ->
+		Short = (P+1+M)-N,
+		io:format("There are not enough pipes to support the system! ~p more are needed~n", [Short]),
+	 	{error, "There are not enough pipes to support the system!"};
+	true ->
+		{ok,PipeTypePID} = resource_type:create(pipeTyp,[]),
+		Pipes = makePipes(N,[], PipeTypePID),
+		io:format("~p pipes are made ~n", [N]),
+		%now all pipes are made, the need to be connected together
+		%All pipes in the list are connected with the one behind and in front of it
+		%The last and first pipe in the list are also connected
+		connectPipes(Pipes),
+		Connectors = getAllConnectors(Pipes),
+		Locations = getAllLocations(Pipes),
 
-	%Adding the fluidum to the just created network
-	FluidumType = fluidumTyp:create(),
-    [C1|Connectors2] = Connectors,
-	{ok, FluidumInst} = fluidumInst:create(C1, FluidumType), %as rootConnector is chosen for P1C1
+		%Adding the fluidum to the just created network
+		FluidumType = fluidumTyp:create(),
+		[C1|_Connectors2] = Connectors,
+		{ok, FluidumInst} = fluidumInst:create(C1, FluidumType), %as rootConnector is chosen for P1C1
 
-	%Now all the pumps will be made
-    {ok, PumpTypePID} = pumpTyp:create(),
-    {ok, {Pumps, PipesFreeAfterPumps}} = makePumps(P, [], PumpTypePID, Pipes),
-    io:format("this are the pipes free after pumps: ~p~n", [PipesFreeAfterPumps]),
-%    {ok, {Pipes, FluidumInst, Pumps}}.
+		%Now all the pumps will be made
+		{ok, PumpTypePID} = pumpTyp:create(),
+		{ok, {Pumps, PipesFreeAfterPumps}} = makePumps(P, [], PumpTypePID, Pipes),
+		io:format("~p Pumps are made ~n", [P]),
+		%io:format("this are the pipes free after pumps: ~p~n", [PipesFreeAfterPumps]),
+	%    {ok, {Pipes, FluidumInst, Pumps}}.
 
-    %Adding the flowmeters
-	{ok, FlowMeterTypePID} = flowMeterTyp:create(),
-    % io:format("de vrije pijpen voor de flowmeter zijn: ~p ~n", [PipesFreeAfterPumps]),
-    % {ok, {FlowMeters, PipesFreeAfterFlowMeters}} = makeFlowMeters(O, [], FlowMeterTypePID, PipesFreeAfterPumps),
-    % [Pijpke | Other] = PipesFreeAfterPumps,
-    % RealWorldCmdFnFlowMeter = fun() ->	{ok, real_flow} end,
-    % {ok, FlowMeters} = flowMeterInst:create(self(), FlowMeterTypePID, Pijpke, RealWorldCmdFnFlowMeter),
-    %io:format("de flowmeters zitten op ~p en de pijpen die over zijn zijn: ~p ~n", [FlowMeters, PipesFreeAfterFlowMeters]),
-    %{ok,{FlowMeterList ++[FlowMeterInst], PipesNotUsed}};
+		%Adding the flowmeter, One flowmeter is enough in this system
+		{ok, FlowMeterTypePID} = flowMeterTyp:create(),
+		%io:format("de vrije pijpen voor de flowmeter zijn: ~p ~n", [PipesFreeAfterPumps]),
+		[Pijpke | PipesFreeAfterFlowMeter] = PipesFreeAfterPumps,
+		RealWorldCmdFnFlowMeter = fun() ->	{ok, real_flow} end,
+		{ok, FlowMeter} = flowMeterInst:create(self(), FlowMeterTypePID, Pijpke, RealWorldCmdFnFlowMeter),
+		%RealWorldCmdFnFlowMeter = fun() ->	{ok, real_flow} end,
+		%io:format("de flowmeters zitten op ~p en de pijpen die over zijn zijn: ~p ~n", [FlowMeter, PipesFreeAfterFlowMeter]),
 
-	FlowMeters = [],
-    %{ok, {Pipes, FluidumInst, Pumps, FlowMeters}}.
 
-	%Adding the HeatExchanger
-	{ok, HeatExTypePID} = heatExchangerTyp:create(),
-	%To make the heatexchanger, folowing parameters are necessary: Host, HeatExchangerTyp_Pid, PipeInst_Pid, HE_link_spec
-	Difference = 1,
+		%Adding the HeatExchanger
+		{ok, HeatExTypePID} = heatExchangerTyp:create(),
+		%To make the heatexchanger, folowing parameters are necessary: Host, HeatExchangerTyp_Pid, PipeInst_Pid, HE_link_spec
+		Difference = 1,
 
-	{ok, {HeatExchangers, PipesFreeAfterHeatEx}} = makeHeatExchangers(M, [], HeatExTypePID, PipesFreeAfterPumps, Difference), %AANPASSEN NA TOEVOEGEN FLOWMETER!!
-    io:format("The Heatexchangers are: ~p~n", [HeatExchangers]),
+		{ok, {HeatExchangers, _PipesFreeAfterHeatEx}} = makeHeatExchangers(M, [], HeatExTypePID, PipesFreeAfterFlowMeter, Difference), %AANPASSEN NA TOEVOEGEN FLOWMETER!!
+		%io:format("The Heatexchangers are: ~p~n", [HeatExchangers]),
+		io:format("~p HeatExchangers are made ~n", [M]),
 
-	Types = [PipeTypePID, FluidumType, PumpTypePID, FlowMeterTypePID, HeatExTypePID],
+		Types = [PipeTypePID, FluidumType, PumpTypePID, FlowMeterTypePID, HeatExTypePID],
 
-    {ok, {Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeters, HeatExchangers}}.
-
+		{ok, {Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers}}
+	end.
 
 stop() ->
 	survivor ! stop,
@@ -126,6 +129,7 @@ getAllConnectors([],Connectors) ->
 	%io:format("~p is de lijst met connectors ~n",[Connectors]),
 	Connectors.
 
+
 %Function to return all the locations
 getAllLocations(Pipes) ->
 	getAllLocations(Pipes,[]).
@@ -136,7 +140,7 @@ getAllLocations([Pipe|OtherPipes],Locations) ->
 	getAllLocations(OtherPipes,LocationAdded);
 	
 getAllLocations([],Locations) ->
-	io:format("De lijst met de locations: ~p~n", [Locations]),
+	%io:format("De lijst met de locations: ~p~n", [Locations]),
 	Locations.
 
 %Recursive Function to make N amount of pipes
@@ -153,7 +157,7 @@ makePumps(1, PumpList, PumpTypePID, Pipes) ->
 	%PumpInst is the actual pump
 	%to create the PumpInst, the Host, PumpTyp_Pid, PipeInst_Pid, RealWorldCmdFn are needed
     {PipesPumpList, PipesNotUsed} = lists:split(1,Pipes),
-    io:format("the used pipe is is ~p ~n", [PipesPumpList]),
+    %io:format("the used pipe is is ~p ~n", [PipesPumpList]),
 	{ok,PumpInst} = pumpInst:create(self(), PumpTypePID, PipesPumpList, RealWorldCmdFnPump),
     {ok,{PumpList ++[PumpInst], PipesNotUsed}};
 
@@ -167,82 +171,15 @@ makePumps(P, PumpList, PumpTypePID, Pipes) ->
         %PumpInst is the actual pump
         %to create the PumpInst, the Host, PumpTyp_Pid, PipeInst_Pid, RealWorldCmdFn are needed
         {PipesPumpList, PipesNotUsed} = lists:split(1,Pipes),
-        io:format("the used pipe is ~p ~n", [PipesPumpList]),
+        %io:format("the used pipe is ~p ~n", [PipesPumpList]),
         {ok,PumpInst} = pumpInst:create(self(), PumpTypePID, PipesPumpList, RealWorldCmdFnPump),
         NewPumpList = PumpList ++[PumpInst],
         P2 = P-1,
         makePumps(P2, NewPumpList, PumpTypePID, PipesNotUsed);
 	 true ->
-		io:format("P has a negative value!~n"),
+		%io:format("P has a negative value!~n"),
 	 	{error, "P has a negative value"}
 	end.
-
-makeFlowMeters(1, FlowMeterList, FlowMeterTypePID, Pipes) ->
-    RealWorldCmdFnFlowMeter = fun() ->	{ok, real_flow} end,
-
-    {PipesFlowMeterList, PipesNotUsed} = lists:split(1,Pipes),
-    io:format("the used pipe is is ~p ~n", [PipesFlowMeterList]),
-    io:format("the host is: ~p~n", [self()]),
-    io:format("the flowmeterType PID is: ~p ~n", [FlowMeterTypePID]),
-    io:format("the used pipe is ~p ~n", [PipesFlowMeterList]),
-    io:format("the RealWorldCmdFnFlowMeter is: ~p ~n", [RealWorldCmdFnFlowMeter]),
-	{ok, FlowMeterInst} = flowMeterInst:create(self(), FlowMeterTypePID, PipesFlowMeterList, RealWorldCmdFnFlowMeter),
-    {ok,{FlowMeterList ++[FlowMeterInst], PipesNotUsed}};
-
-makeFlowMeters(O, FlowMeterList, FlowMeterTypePID, Pipes) ->
-	if O > 1 ->
-        RealWorldCmdFnFlowMeter = fun() ->	{ok, real_flow} end,
-
-        {PipesFlowMeterList, PipesNotUsed} = lists:split(1,Pipes),
-        io:format("the used pipe is ~p ~n", [PipesFlowMeterList]),
-        io:format("the host is: ~p~n", [self()]),
-        io:format("the flowmeterType PID is: ~p ~n", [FlowMeterTypePID]),
-        io:format("the used pipe is ~p ~n", [PipesFlowMeterList]),
-        io:format("the RealWorldCmdFnFlowMeter is: ~p ~n", [RealWorldCmdFnFlowMeter]),
-        {ok,FlowMeterInst} = flowMeterInst:create(self(), FlowMeterTypePID, PipesFlowMeterList, RealWorldCmdFnFlowMeter),
-        io:format("FlowMeterInst is: ~p~n",[FlowMeterInst]),
-        NewFlowMeterList = FlowMeterList ++[FlowMeterInst],
-        O2 = O-1,
-        makeFlowMeters(O2, NewFlowMeterList, FlowMeterTypePID, PipesNotUsed);
-	 true ->
-		io:format("O has a negative value!~n"),
-	 	{error, "O has a negative value"}
-	end.
-
-
-
-
-% makeFlowMeters(1, FlowMeterList, FlowMeterTypePID, PipesFreeAfterPumps) ->
-%     %To make the flowmeter, these parameters are needed: Host, FlowMeterTyp_Pid, ResInst_Pid, RealWorldCmdFn
-%     RealWorldCmdFnFlowMeter = fun() ->	{ok, real_flow} end,
-%     {PipesFlowMeterList, PipesNotUsed} = lists:split(1,PipesFreeAfterPumps),
-%     %[PipesFlowMeterList| PipesNotUsed] = PipesFreeAfterPumps,
-%     io:format("the used pipe is ~p ~n", [PipesFlowMeterList]),
-%     {ok, FlowMeterInst} = flowMeterInst:create(self(), FlowMeterTypePID, PipesFlowMeterList, RealWorldCmdFnFlowMeter),
-%     NewFlowMeterList = FlowMeterList ++[FlowMeterInst],
-%     io:format("the new flowmeterList is: ~p ~n", [NewFlowMeterList]),
-
-%     {ok,{NewFlowMeterList, PipesNotUsed}};
-
-% makeFlowMeters(O, FlowMeterList, FlowMeterTypePID, PipesFreeAfterPumps) ->
-% 	if O > 1 ->
-% 	    RealWorldCmdFnFlowMeter = fun() ->	{ok, real_flow} end,
-%         {PipesFlowMeterList, PipesNotUsed} = lists:split(1,PipesFreeAfterPumps),
-%         %[PipesFlowMeterList| PipesNotUsed] = PipesFreeAfterPumps,
-%         io:format("the host is: ~p~n", [self()]),
-%         io:format("the flowmeterType PID is: ~p ~n", [FlowMeterTypePID]),
-%         io:format("the used pipe is ~p ~n", [PipesFlowMeterList]),
-%         io:format("the RealWorldCmdFnFlowMeter is: ~p ~n", [RealWorldCmdFnFlowMeter]),
-        
-% 	    {ok, FlowMeterInst} = flowMeterInst:create(self(), FlowMeterTypePID, PipesFlowMeterList, RealWorldCmdFnFlowMeter),
-        
-%         NewFlowMeterList = FlowMeterList ++[FlowMeterInst],
-%         O2 = O-1,
-%         makePumps(O2, NewFlowMeterList, FlowMeterTypePID, PipesNotUsed);
-% 	 true ->
-% 		io:format("O has a negative value!~n"),
-% 	 	{error, "O has a negative value"}
-% 	end.
 
 
 makeHeatExchangers(1, HeatExList, HeatExTypePID, Pipes, Difference) ->
