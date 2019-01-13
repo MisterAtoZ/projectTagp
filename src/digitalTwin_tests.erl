@@ -38,7 +38,7 @@ return_startNPipesPPumpsOFlowMetersMHeatex() ->
     {Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}.
 
 stop(_) ->
-    ?debugFmt("Stoppen in digitalTwin_tests-file",[]),
+    %?debugFmt("Stoppen in digitalTwin_tests-file",[]),
     digitalTwin:stop().
 
 %===========================================================================================
@@ -79,24 +79,38 @@ checkAllPipesInst(1, PipesToDo, ConnectorsToDo, LocationsToDo, TestsPipeInst) ->
     [C1, C2 | _ToDoConnectors] = ConnectorsToDo,
     [L1 | _ToDoLocations] = LocationsToDo,
 
-    NewTestsPipeInst = [TestsPipeInst | ?_assert(erlang:is_process_alive(CheckPipeInst))],
-    NewTestsPipeInst2 = [NewTestsPipeInst | ?_assert(erlang:is_process_alive(C1))],
-    NewTestsPipeInst3 = [NewTestsPipeInst2 | ?_assert(erlang:is_process_alive(C2))],
-    NewTestsPipeInst4 = [NewTestsPipeInst3 | ?_assert(erlang:is_process_alive(L1))],
+    TestsPipeInst2 = [?_assert(erlang:is_process_alive(CheckPipeInst)),
+                        ?_assert(erlang:is_process_alive(C1)), 
+                        ?_assert(erlang:is_process_alive(C2)), 
+                        ?_assert(erlang:is_process_alive(L1))],
 
-    NewTestsPipeInst4;
+    %?debugFmt("de testlijst ziet er zo uit: ~p~n",[TestsPipeInst2]),
+
+    %With this way of filling this list, an improper list is created (checked with dialyzer)
+    % NewTestsPipeInst = [TestsPipeInst | ?_assert(erlang:is_process_alive(CheckPipeInst))],
+    % NewTestsPipeInst2 = [NewTestsPipeInst | ?_assert(erlang:is_process_alive(C1))],
+    % NewTestsPipeInst3 = [NewTestsPipeInst2 | ?_assert(erlang:is_process_alive(C2))],
+    % NewTestsPipeInst4 = [NewTestsPipeInst3 | ?_assert(erlang:is_process_alive(L1))],
+
+    TestsPipeInst++TestsPipeInst2;
+    
 
 checkAllPipesInst(Q, PipesToDo, ConnectorsToDo, LocationsToDo, TestsPipeInst) ->
     [CheckPipeInst | ToDoPipes] = PipesToDo,
     [C1, C2 | ToDoConnectors] = ConnectorsToDo,
     [L1 | ToDoLocations] = LocationsToDo,
 
-    NewTestsPipeInst = [TestsPipeInst | ?_assert(erlang:is_process_alive(CheckPipeInst))],
-    NewTestsPipeInst2 = [NewTestsPipeInst | ?_assert(erlang:is_process_alive(C1))],
-    NewTestsPipeInst3 = [NewTestsPipeInst2 | ?_assert(erlang:is_process_alive(C2))],
-    NewTestsPipeInst4 = [NewTestsPipeInst3 | ?_assert(erlang:is_process_alive(L1))],
+    TestsPipeInst2 = [?_assert(erlang:is_process_alive(CheckPipeInst)),
+                        ?_assert(erlang:is_process_alive(C1)), 
+                        ?_assert(erlang:is_process_alive(C2)), 
+                        ?_assert(erlang:is_process_alive(L1))],
 
-    checkAllPipesInst(Q-1, ToDoPipes, ToDoConnectors, ToDoLocations, NewTestsPipeInst4).
+    % NewTestsPipeInst = [TestsPipeInst | ?_assert(erlang:is_process_alive(CheckPipeInst))],
+    % NewTestsPipeInst2 = [NewTestsPipeInst | ?_assert(erlang:is_process_alive(C1))],
+    % NewTestsPipeInst3 = [NewTestsPipeInst2 | ?_assert(erlang:is_process_alive(C2))],
+    % NewTestsPipeInst4 = [NewTestsPipeInst3 | ?_assert(erlang:is_process_alive(L1))],
+
+    checkAllPipesInst(Q-1, ToDoPipes, ToDoConnectors, ToDoLocations, TestsPipeInst++TestsPipeInst2).
 
 %-------------------------------------------------------------------------------------------------------------------------------
 %Tests of the fluidum
@@ -136,78 +150,78 @@ checkAllPumpInst({_Types,_Pipes,_Connectors,_Locations,_FluidumInst, Pumps,_Flow
 checkAllPumpInst(1, PumpsToDo, TestsPumpInst) ->
     [CheckPumpInst|_ToDoPumps] = PumpsToDo,
     Test = ?_assert(erlang:is_process_alive(CheckPumpInst)),
-    NewTestsPumpInst = [TestsPumpInst|Test],
+    %NewTestsPumpInst = [TestsPumpInst|Test],
     
     %Now the functions of the pump will be tests
     %To start, the pump should be off
     {ok, OnOffState} = pumpInst:is_on(CheckPumpInst),
-    NewTestsPumpInst2 = [NewTestsPumpInst | ?_assertEqual(OnOffState,off)],
+    Test2 = ?_assertEqual(OnOffState,off),
 
     %Next function checked is to turn the pump on
     pumpInst:switch_on(CheckPumpInst),
     %Now, the pump should be turned on
     {ok, OnOffState2} = pumpInst:is_on(CheckPumpInst),
-    NewTestsPumpInst3 = [NewTestsPumpInst2 | ?_assertEqual(OnOffState2, on)],
+    Test3 = ?_assertEqual(OnOffState2, on),
 
     %If switch_on is used again, it should still be on
     pumpInst:switch_on(CheckPumpInst),
     %Now, the pump should still be turned on
     {ok, OnOffState3} = pumpInst:is_on(CheckPumpInst),
-    NewTestsPumpInst4 = [NewTestsPumpInst3 | ?_assertEqual(OnOffState3, on)],
+    Test4 = ?_assertEqual(OnOffState3, on),
 
     %It should be also checked that the pump shuts off again
     pumpInst:switch_off(CheckPumpInst),
     %Now, the pump should be turned off
     {ok, OnOffState4} = pumpInst:is_on(CheckPumpInst),
-    NewTestsPumpInst5 = [NewTestsPumpInst4 | ?_assertEqual(OnOffState4, off)],
+    Test5 = ?_assertEqual(OnOffState4, off),
 
     %It should be also checked that the pump will stay shuts off when switch_off is used again
     pumpInst:switch_off(CheckPumpInst),
     %Now, the pump should be turned off
     {ok, OnOffState5} = pumpInst:is_on(CheckPumpInst),
-    NewTestsPumpInst6 = [NewTestsPumpInst5 | ?_assertEqual(OnOffState5, off)],
+    Test6 = ?_assertEqual(OnOffState5, off),
 
-    NewTestsPumpInst6;
+    NewTestsPumpInst = [Test, Test2, Test3, Test4, Test5, Test6],
+    TestsPumpInst++NewTestsPumpInst;
 
 checkAllPumpInst(Q, PumpsToDo, TestsPumpInst) ->
     if Q > 0 ->
         %Grab the pump to test and check if it is alive
         [CheckPumpInst|_ToDoPumps] = PumpsToDo,
         Test = ?_assert(erlang:is_process_alive(CheckPumpInst)),
-        NewTestsPumpInst = [TestsPumpInst|Test],
-        %TestsPumpInst = lists:append(TestsPumpInst, [Test]),
-        %TestsPumpInst = TestsPumpInst ++[Test],
-
+        %NewTestsPumpInst = [TestsPumpInst|Test],
+        
         %Now the functions of the pump will be tests
         %To start, the pump should be off
         {ok, OnOffState} = pumpInst:is_on(CheckPumpInst),
-        NewTestsPumpInst2 = [NewTestsPumpInst | ?_assertEqual(OnOffState,off)],
+        Test2 = ?_assertEqual(OnOffState,off),
 
         %Next function checked is to turn the pump on
         pumpInst:switch_on(CheckPumpInst),
         %Now, the pump should be turned on
         {ok, OnOffState2} = pumpInst:is_on(CheckPumpInst),
-        NewTestsPumpInst3 = [NewTestsPumpInst2 | ?_assertEqual(OnOffState2, on)],
+        Test3 = ?_assertEqual(OnOffState2, on),
 
         %If switch_on is used again, it should still be on
         pumpInst:switch_on(CheckPumpInst),
         %Now, the pump should still be turned on
         {ok, OnOffState3} = pumpInst:is_on(CheckPumpInst),
-        NewTestsPumpInst4 = [NewTestsPumpInst3 | ?_assertEqual(OnOffState3, on)],
+        Test4 = ?_assertEqual(OnOffState3, on),
 
         %It should be also checked that the pump shuts off again
         pumpInst:switch_off(CheckPumpInst),
         %Now, the pump should be turned off
         {ok, OnOffState4} = pumpInst:is_on(CheckPumpInst),
-        NewTestsPumpInst5 = [NewTestsPumpInst4 | ?_assertEqual(OnOffState4, off)],
+        Test5 = ?_assertEqual(OnOffState4, off),
 
         %It should be also checked that the pump will stay shuts off when switch_off is used again
         pumpInst:switch_off(CheckPumpInst),
         %Now, the pump should be turned off
         {ok, OnOffState5} = pumpInst:is_on(CheckPumpInst),
-        NewTestsPumpInst6 = [NewTestsPumpInst5 | ?_assertEqual(OnOffState5, off)],
+        Test6 = ?_assertEqual(OnOffState5, off),
 
-        checkAllPumpInst(Q-1, PumpsToDo, NewTestsPumpInst6);
+        NewTestsPumpInst = [Test, Test2, Test3, Test4, Test5, Test6],
+        checkAllPumpInst(Q-1, PumpsToDo, TestsPumpInst++NewTestsPumpInst);
     true ->
         io:format("P has a negative value!~n"),
 	 	{error, "P has a negative value"}
@@ -226,7 +240,7 @@ checkPumpFlowInfluence(1, PumpsToDo, TestsPumpFlow) ->
     %The pump should be turned off, lets check that first
     {ok, OnOffState} = pumpInst:is_on(CheckPumpFlow),
     FirstTests = ?_assertEqual(OnOffState,off),
-    NewTestsPumpFlow = [TestsPumpFlow | FirstTests],
+    %NewTestsPumpFlow = [TestsPumpFlow | FirstTests],
     %A basic flow has to be set
     Flow = 5,    
 
@@ -234,20 +248,21 @@ checkPumpFlowInfluence(1, PumpsToDo, TestsPumpFlow) ->
     {ok, FlowOff} = pumpInst:flow_influence(CheckPumpFlow),
     FlowReferenceOff = 0, %Here could also the same formula as FlowReferenceOn be used, this should ofcourse also give 0
     TestFlowOff = ?_assertEqual(FlowOff(Flow), FlowReferenceOff),
-    NewTestsPumpFlow2 = [NewTestsPumpFlow | TestFlowOff],
+    %NewTestsPumpFlow2 = [NewTestsPumpFlow | TestFlowOff],
 
     %Now the pump is turned on and the flow is checked
     pumpInst:switch_on(CheckPumpFlow),
     {ok, OnOffState2} = pumpInst:is_on(CheckPumpFlow),
     TestPumpOn = ?_assertEqual(OnOffState2,on),
-    NewTestsPumpFlow3 = [NewTestsPumpFlow2 | TestPumpOn],
+    %NewTestsPumpFlow3 = [NewTestsPumpFlow2 | TestPumpOn],
 
     {ok, FlowOn} = pumpInst:flow_influence(CheckPumpFlow),
     FlowReferenceOn = 250 - 5 * Flow - 2 * Flow * Flow,
     TestFlowOn = ?_assertEqual(FlowOn(Flow), FlowReferenceOn),
-    NewTestsPumpFlow4 = [NewTestsPumpFlow3 | TestFlowOn],
+    %NewTestsPumpFlow4 = [NewTestsPumpFlow3 | TestFlowOn],
     
-    NewTestsPumpFlow4;
+    NewTestsPumpFlow = [FirstTests, TestFlowOff, TestPumpOn, TestFlowOn],
+    TestsPumpFlow++NewTestsPumpFlow;
 
 checkPumpFlowInfluence(Q, PumpsToDo, TestsPumpFlow) ->
     if Q > 0 ->
@@ -256,7 +271,7 @@ checkPumpFlowInfluence(Q, PumpsToDo, TestsPumpFlow) ->
         %The pump should be turned off, lets check that first
         {ok, OnOffState} = pumpInst:is_on(CheckPumpFlow),
         FirstTests = ?_assertEqual(OnOffState,off),
-        NewTestsPumpFlow = [TestsPumpFlow | FirstTests],
+        %NewTestsPumpFlow = [TestsPumpFlow | FirstTests],
         %A basic flow has to be set
         Flow = 5,    
 
@@ -264,20 +279,21 @@ checkPumpFlowInfluence(Q, PumpsToDo, TestsPumpFlow) ->
         {ok, FlowOff} = pumpInst:flow_influence(CheckPumpFlow),
         FlowReferenceOff = 0, %Here could also the same formula as FlowReferenceOn be used, this should ofcourse also give 0
         TestFlowOff = ?_assertEqual(FlowOff(Flow), FlowReferenceOff),
-        NewTestsPumpFlow2 = [NewTestsPumpFlow | TestFlowOff],
+        %NewTestsPumpFlow2 = [NewTestsPumpFlow | TestFlowOff],
 
         %Now the pump is turned on and the flow is checked
         pumpInst:switch_on(CheckPumpFlow),
         {ok, OnOffState2} = pumpInst:is_on(CheckPumpFlow),
         TestPumpOn = ?_assertEqual(OnOffState2,on),
-        NewTestsPumpFlow3 = [NewTestsPumpFlow2 | TestPumpOn],
+        %NewTestsPumpFlow3 = [NewTestsPumpFlow2 | TestPumpOn],
 
         {ok, FlowOn} = pumpInst:flow_influence(CheckPumpFlow),
         FlowReferenceOn = 250 - 5 * Flow - 2 * Flow * Flow,
         TestFlowOn = ?_assertEqual(FlowOn(Flow), FlowReferenceOn),
-        NewTestsPumpFlow4 = [NewTestsPumpFlow3 | TestFlowOn],
+        %NewTestsPumpFlow4 = [NewTestsPumpFlow3 | TestFlowOn],
         
-        checkPumpFlowInfluence(Q-1, ToDoPumps, NewTestsPumpFlow4);
+        NewTestsPumpFlow = [FirstTests, TestFlowOff, TestPumpOn, TestFlowOn],
+        checkPumpFlowInfluence(Q-1, ToDoPumps, TestsPumpFlow++NewTestsPumpFlow);
     true ->
         io:format("P has a negative value!~n"),
 	 	{error, "P has a negative value"}
@@ -286,7 +302,7 @@ checkPumpFlowInfluence(Q, PumpsToDo, TestsPumpFlow) ->
 %--------------------------------------------------------------------------------------------------
 %Tests of the Flowmeter
 
-checkFlowmeter({_Types,_Pipes,_Connectors,_Locations,_FluidumInst,_Pumps, FlowMeter,_HeatExchangers,_N,_P,_M}) ->
+checkFlowmeter({_Types, Pipes,_Connectors,_Locations,_FluidumInst,_Pumps, FlowMeter,_HeatExchangers,_N,_P,_M}) ->
     %First check if the processes are alive
     FirstTests = ?_assert(erlang:is_process_alive(FlowMeter)),
     
@@ -295,10 +311,14 @@ checkFlowmeter({_Types,_Pipes,_Connectors,_Locations,_FluidumInst,_Pumps, FlowMe
     Test2 = ?_assertEqual(FlowMeasured,{ok,real_flow}), 
 
     %Testing the estimated value
-    % {ok, EstFlow} = flowMeterInst:estimate_flow(FlowMeterInst),
-    % Test3 = ?_assertEqual(EstFlow,iets), %This function does not work well
+    {ok, EstFlow} = flowMeterInst:estimate_flow(FlowMeter),
+    %Return the RefList for every pipe in the system
+    RefList = findRefList(Pipes, []),
+    Interval = {0, 10},
+	RefFlow = compute(Interval, RefList),
+    Test3 = ?_assertEqual(EstFlow, RefFlow), 
 
-    FlowMeterTests = [FirstTests, Test2],
+    FlowMeterTests = [FirstTests, Test2, Test3],
     FlowMeterTests.
     %[FirstTests, Test2, Test3].
 
@@ -314,7 +334,7 @@ checkHeatEx(1, HeatExToDo, TestsHeatEx) ->
 
     %First check if the processes of the heatex are alive
     FirstTests = ?_assert(erlang:is_process_alive(CheckHeatEx)),
-    NewTestsHeatEx = [TestsHeatEx | FirstTests],
+    %NewTestsHeatEx = [TestsHeatEx | FirstTests],
 
     %The heatexchangers temp_influence(HeatExchangerInst_Pid) function is tested
     {ok, {ok,Influence}} = heatExchangerInst:temp_influence(CheckHeatEx),
@@ -324,9 +344,10 @@ checkHeatEx(1, HeatExToDo, TestsHeatEx) ->
     {ok, HeatExInfluence} = Influence(Flow, Temp),
     CalculateInfluence = Temp + (Difference/Flow),
     TestInfluence = ?_assertEqual(HeatExInfluence, CalculateInfluence),
-    NewTestsHeatEx2 = [NewTestsHeatEx | TestInfluence],
+    %NewTestsHeatEx2 = [NewTestsHeatEx | TestInfluence],
 
-    NewTestsHeatEx2;
+    NewTestsHeatEx = [FirstTests, TestInfluence],
+    TestsHeatEx++NewTestsHeatEx;
 
 checkHeatEx(Q, HeatExToDo, TestsHeatEx) ->
     if Q > 0 ->
@@ -334,7 +355,7 @@ checkHeatEx(Q, HeatExToDo, TestsHeatEx) ->
 
     %First check if the processes of the heatex are alive
     FirstTests = ?_assert(erlang:is_process_alive(CheckHeatEx)),
-    NewTestsHeatEx = [TestsHeatEx | FirstTests],
+    %NewTestsHeatEx = [TestsHeatEx | FirstTests],
 
     %The heatexchangers temp_influence(HeatExchangerInst_Pid) function is tested
     {ok, {ok,Influence}} = heatExchangerInst:temp_influence(CheckHeatEx),
@@ -344,9 +365,11 @@ checkHeatEx(Q, HeatExToDo, TestsHeatEx) ->
     {ok, HeatExInfluence} = Influence(Flow, Temp),
     CalculateInfluence = Temp + (Difference/Flow),
     TestInfluence = ?_assertEqual(HeatExInfluence, CalculateInfluence),
-    NewTestsHeatEx2 = [NewTestsHeatEx | TestInfluence],
+    %NewTestsHeatEx2 = [NewTestsHeatEx | TestInfluence],
 
-    checkHeatEx(Q-1, ToDoHeatEx, NewTestsHeatEx2);
+    NewTestsHeatEx = [FirstTests, TestInfluence],
+    checkHeatEx(Q-1, ToDoHeatEx, NewTestsHeatEx);
+
     true ->
         io:format("M has a negative value!~n"),
 	 	{error, "M has a negative value"}
@@ -365,9 +388,38 @@ check_resourceCircuit([PipeToCheck | Rest], GetCircuit, Checks) ->
     %?debugFmt("And the map of the circuit looks like: ~p~n", [GetCircuit]),
     {ok, PipeInMap} = maps:find(PipeToCheck, GetCircuit),
     %?debugFmt("PipeInMap looks like: ~p~n", [PipeInMap]),
-    NewChecks = [Checks | ?_assertEqual(PipeInMap, processed)],
-    check_resourceCircuit(Rest, GetCircuit, NewChecks);
+    NewChecks = [?_assertEqual(PipeInMap, processed)],
+    check_resourceCircuit(Rest, GetCircuit, Checks++NewChecks);
 
 
 check_resourceCircuit([], _GetCircuit, Checks) -> %%Can not be at the top!!
     Checks.
+
+
+findRefList([Pipe|ToDoPipes], RefList)->
+    {ok, Ref} = apply(resource_instance, get_flow_influence, [Pipe]),
+    findRefList(ToDoPipes, RefList++[Ref]);
+
+findRefList([], RefList) ->
+    RefList.
+
+compute({Low, High}, _InflFnCircuit) when (High - Low) < 1 -> 
+	%Todo convergentiewaarde instelbaar maken. 
+	(Low + High) / 2 ;
+	
+compute({Low, High}, InflFnCircuit) ->
+	L = eval(Low, InflFnCircuit, 0),
+	H = eval(High, InflFnCircuit, 0),
+	L = eval(Low, InflFnCircuit, 0),
+	H = eval(High, InflFnCircuit, 0),
+	Mid = (H + L) / 2, M = eval(Mid, InflFnCircuit, 0),
+	if 	M > 0 -> 
+			compute({Low, Mid}, InflFnCircuit);
+        true -> % works as an 'else' branch
+            compute({Mid, High}, InflFnCircuit)
+    end.
+
+eval(Flow, [Fn | RemFn] , Acc) ->
+	eval(Flow, RemFn, Acc + Fn(Flow));
+
+eval(_Flow, [], Acc) -> Acc. 

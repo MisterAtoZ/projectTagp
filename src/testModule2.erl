@@ -14,7 +14,7 @@
 
 startSimpleTest() ->
 	%This function makes a simple network with 3 pipes connected together
-	?debugFmt("Starten van de 1e functie",[]),
+	%?debugFmt("Starten van de 1e functie",[]),
 	%survivor:start(),
 	%survivor2:start(),
 	{ok, PipeTypePID} = resource_type:create(pipeTyp,[]),
@@ -43,7 +43,7 @@ startSimpleTest() ->
 	{ok, {Pipe1InstPID, Pipes, Connectors, Locations}}.
 
 startNPipes(N) ->
-	?debugFmt("Starten van de 2e functie",[]),
+	%?debugFmt("Starten van de 2e functie",[]),
 	%This function strives to:
 	%1) Create N pipe instances
 	%2) Create a network containing all N pipes, connecting them in a circle
@@ -62,7 +62,7 @@ startNPipes(N) ->
 	{ok, {PipeTypePID, Pipes, Connectors, Locations}}.
 
 startSimpleTestFluidum() ->
-	?debugFmt("Starten van de 3e functie",[]),
+	%?debugFmt("Starten van de 3e functie",[]),
 	%This function makes a simple network with 3 pipes connected together
 	%Afterwards it fill it up with water
 	%survivor:start(),
@@ -74,14 +74,6 @@ startSimpleTestFluidum() ->
 	{ok,[P1C1,P1C2]} = resource_instance:list_connectors(Pipe1InstPID),
 	{ok,[P2C1,P2C2]} = resource_instance:list_connectors(Pipe2InstPID),
 	{ok,[P3C1,P3C2]} = resource_instance:list_connectors(Pipe3InstPID),
-
-	% {ok,[Location1]} = resource_instance:list_locations(Pipe1InstPID),
-	% {ok,[Location2]} = resource_instance:list_locations(Pipe2InstPID),
-	% {ok,[Location3]} = resource_instance:list_locations(Pipe3InstPID),
-	
-	% io:format("~p is the location of pipe1 ~n", [Location1]),
-	% io:format("~p is the location of pipe2 ~n", [Location2]),
-	% io:format("~p is the location of pipe2 ~n", [Location3]),
 
 	connector:connect(P2C2,P3C1),
 	connector:connect(P1C1,P3C2),
@@ -95,10 +87,18 @@ startSimpleTestFluidum() ->
 	FluidumTyp = fluidumTyp:create(),
 	{ok, FluidumInst} = fluidumInst:create(P1C1, FluidumTyp), %as rootConnector is chosen for P1C1
 
+	{ok,[Location1]} = resource_instance:list_locations(Pipe1InstPID),
+	{ok,[Location2]} = resource_instance:list_locations(Pipe2InstPID),
+	{ok,[Location3]} = resource_instance:list_locations(Pipe3InstPID),
+
+	location:arrival(Location1, FluidumInst),
+	location:arrival(Location2, FluidumInst),
+	location:arrival(Location3, FluidumInst),
+
 	{ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst}}.
 
 startSimpleTestFluidumPump() ->
-	?debugFmt("Starten van de 4e functie",[]),
+	%?debugFmt("Starten van de 4e functie",[]),
 	%This function makes a simple network with 3 pipes connected together
 	%Add a pump and
 	%Afterwards it fill it up with water
@@ -135,11 +135,18 @@ startSimpleTestFluidumPump() ->
 	%Adding the fluidum to the just created network
 	FluidumTyp = fluidumTyp:create(),
 	{ok, FluidumInst} = fluidumInst:create(P1C1, FluidumTyp), %as rootConnector is chosen for P1C1
+	{ok,[Location1]} = resource_instance:list_locations(Pipe1InstPID),
+	{ok,[Location2]} = resource_instance:list_locations(Pipe2InstPID),
+	{ok,[Location3]} = resource_instance:list_locations(Pipe3InstPID),
+
+	location:arrival(Location1, FluidumInst),
+	location:arrival(Location2, FluidumInst),
+	location:arrival(Location3, FluidumInst),
 
 	{ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst}}.
 
 startSimpleTestFluidumPumpFlowMeter() ->
-	?debugFmt("Starten van de 5e functie",[]),
+	%?debugFmt("Starten van de 5e functie",[]),
 	%This function makes a simple network with 3 pipes connected together
 	%Add a pump and
 	%Afterwards it fill it up with water and add a Flowmeter
@@ -178,6 +185,14 @@ startSimpleTestFluidumPumpFlowMeter() ->
 	%Adding the FluidumInst to the just created network
 	FluidumTyp = fluidumTyp:create(),
 	{ok, FluidumInst} = fluidumInst:create(P1C1, FluidumTyp), %as rootConnector is chosen for P1C1
+	{ok,[Location1]} = resource_instance:list_locations(Pipe1InstPID),
+	{ok,[Location2]} = resource_instance:list_locations(Pipe2InstPID),
+	{ok,[Location3]} = resource_instance:list_locations(Pipe3InstPID),
+
+	location:arrival(Location1, FluidumInst),
+	location:arrival(Location2, FluidumInst),
+	location:arrival(Location3, FluidumInst),
+
 
 	%Adding the flowmeter
 	{ok, FlowMeterTypePID} = flowMeterTyp:create(),
@@ -190,7 +205,7 @@ startSimpleTestFluidumPumpFlowMeter() ->
 	{ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst, FlowMeterTypePID, FlowMeterInst}}.
 
 startSimpleTestFluidumPumpFlowMeterHeatEx() ->
-	?debugFmt("Starten van de 6e functie",[]),
+	%?debugFmt("Starten van de 6e functie",[]),
 	%This function makes a simple network with 3 pipes connected together
 	%Add a pump and
 	%Afterwards it fill it up with water and add a Flowmeter and heatexchanger
@@ -229,6 +244,13 @@ startSimpleTestFluidumPumpFlowMeterHeatEx() ->
 	%Adding the fluidum to the just created network
 	FluidumTyp = fluidumTyp:create(),
 	{ok, FluidumInst} = fluidumInst:create(P1C1, FluidumTyp), %as rootConnector is chosen for P1C1
+	{ok,[Location1]} = resource_instance:list_locations(Pipe1InstPID),
+	{ok,[Location2]} = resource_instance:list_locations(Pipe2InstPID),
+	{ok,[Location3]} = resource_instance:list_locations(Pipe3InstPID),
+
+	location:arrival(Location1, FluidumInst),
+	location:arrival(Location2, FluidumInst),
+	location:arrival(Location3, FluidumInst),
 
 	%Adding the flowmeter
 	{ok, FlowMeterTypePID} = flowMeterTyp:create(),
@@ -249,7 +271,7 @@ startSimpleTestFluidumPumpFlowMeterHeatEx() ->
 	{ok, {PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst, PumpTypePID, PumpInst, FlowMeterTypePID, FlowMeterInst, HeatExTypePID, HeatExInst}}.
 
 stop() ->
-	?debugFmt("Stoppen in originele file",[]),
+	%?debugFmt("Stoppen in originele file",[]),
 	survivor ! stop,
 	{ok, stopped}.
 

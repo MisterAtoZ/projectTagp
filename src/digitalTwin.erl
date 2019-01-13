@@ -3,6 +3,7 @@
 -export([makePipes/3, makePumps/4]).
 -export([makeHeatExchangers/5]).
 -export([connectPipes/1]).
+-export([fillCircuitWithFluidum/2]).
 -export([stop/0, startSurvivor/0, getAllConnectors/1]).
 
 
@@ -32,6 +33,8 @@ startNPipesPPumpsOFlowMetersMHeatex(N, P, M) ->
 		FluidumType = fluidumTyp:create(),
 		[C1|_Connectors2] = Connectors,
 		{ok, FluidumInst} = fluidumInst:create(C1, FluidumType), %as rootConnector is chosen for P1C1
+		%Adding the fluidum to the circuit
+		fillCircuitWithFluidum(FluidumInst, Locations),
 
 		%Now all the pumps will be made
 		{ok, PumpTypePID} = pumpTyp:create(),
@@ -142,6 +145,14 @@ getAllLocations([Pipe|OtherPipes],Locations) ->
 getAllLocations([],Locations) ->
 	%io:format("De lijst met de locations: ~p~n", [Locations]),
 	Locations.
+
+fillCircuitWithFluidum(FluidumInst, [Location|OtherLocations]) ->
+	location:arrival(Location, FluidumInst),
+	fillCircuitWithFluidum(FluidumInst, OtherLocations);
+
+fillCircuitWithFluidum(_FluidumInst, []) ->
+	ok.
+
 
 %Recursive Function to make N amount of pipes
 % makePipes(N,[], _PipeTypePID) when N =< 0 ->

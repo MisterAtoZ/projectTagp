@@ -108,7 +108,7 @@ return_startSimpleTest() ->
     {PipeTypePID, Pipes, Connectors, Locations}.
 
 stop(_) ->
-    ?debugFmt("Stoppen in test-file",[]),
+    %?debugFmt("Stoppen in test-file",[]),
     testModule2:stop().
 
 return_startNPipes() ->
@@ -217,7 +217,7 @@ checkPipesWithFluidum({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fl
         ?_assert(erlang:is_process_alive(FluidumInst))
     ].
 
-checkFluidumFunctions({_PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst}) ->
+checkFluidumFunctions({_PipeTypePID, Pipes, Connectors,_Locations, FluidumTyp, FluidumInst}) ->
     %Testing function get_locations of fluidumInst 
     %This can get done when sending the message get_locations
     {ok, LocationsFluidum} = msg:get(FluidumInst,get_locations),
@@ -328,7 +328,8 @@ checkPumpFlowInfluence({_PipeTypePID,_Pipes,_Connectors,_Locations,_FluidumTyp,_
     
     [FirstTests, TestFlowOff, TestPumpOn, TestFlowOn].
 
-checkFlowmeter({_PipeTypePID,_Pipes,_Connectors,_Locations,_FluidumTyp,_Fluidum,_PumpTypePID,_PumpInst, FlowMeterTypePID, FlowMeterInst}) ->
+checkFlowmeter({_PipeTypePID, Pipes,_Connectors,_Locations,_FluidumTyp,_Fluidum,_PumpTypePID,_PumpInst, FlowMeterTypePID, FlowMeterInst}) ->
+    [Pipe1, Pipe2, Pipe3|_RestPipes] = Pipes,
     %First check if the processes are alive
     FirstTests = [
         ?_assert(erlang:is_process_alive(FlowMeterTypePID)),
@@ -339,11 +340,16 @@ checkFlowmeter({_PipeTypePID,_Pipes,_Connectors,_Locations,_FluidumTyp,_Fluidum,
     Test2 = ?_assertEqual(FlowMeasured,{ok,real_flow}), %Why does this not work with just real_flow?
 
     %Testing the estimated value
-    % {ok, EstFlow} = flowMeterInst:estimate_flow(FlowMeterInst),
-    % Test3 = ?_assertEqual(EstFlow,iets), %This function does not work well
+    {ok, EstFlow} = flowMeterInst:estimate_flow(FlowMeterInst),
+    {ok, Ref1} = apply(resource_instance, get_flow_influence, [Pipe1]),
+    {ok, Ref2} = apply(resource_instance, get_flow_influence, [Pipe2]),
+    {ok, Ref3} = apply(resource_instance, get_flow_influence, [Pipe3]),
+    RefList = [Ref1, Ref2, Ref3],
+    Interval = {0, 10},
+	RefFlow = compute(Interval, RefList),
+    Test3 = ?_assertEqual(EstFlow, RefFlow), 
 
-    [FirstTests, Test2].
-    %[FirstTests, Test2, Test3].
+    [FirstTests, Test2, Test3].
 
 checkHeatEx({_PipeTypePID,_Pipes,_Connectors,_Locations,_FluidumTyp,_Fluidum,_PumpTypePID,_PumpInst,_FlowMeterTypePID,_FlowMeterInst, HeatExTypePID, HeatExInst}) ->
     %First check if the processes of the heatex are alive
@@ -377,9 +383,30 @@ check_resourceCircuit([PipeToCheck | Rest], GetCircuit, Checks) ->
     %?debugFmt("And the map of the circuit looks like: ~p~n", [GetCircuit]),
     {ok, PipeInMap} = maps:find(PipeToCheck, GetCircuit),
     %?debugFmt("PipeInMap looks like: ~p~n", [PipeInMap]),
-    NewChecks = [Checks | ?_assertEqual(PipeInMap, processed)],
-    check_resourceCircuit(Rest, GetCircuit, NewChecks);
+    NewChecks = [?_assertEqual(PipeInMap, processed)],
+    check_resourceCircuit(Rest, GetCircuit, Checks++NewChecks);
 
 
 check_resourceCircuit([], _GetCircuit, Checks) -> %%Can not be at the top!!
     Checks.
+
+compute({Low, High}, _InflFnCircuit) when (High - Low) < 1 -> 
+	%Todo convergentiewaarde instelbaar maken. 
+	(Low + High) / 2 ;
+	
+compute({Low, High}, InflFnCircuit) ->
+	L = eval(Low, InflFnCircuit, 0),
+	H = eval(High, InflFnCircuit, 0),
+	L = eval(Low, InflFnCircuit, 0),
+	H = eval(High, InflFnCircuit, 0),
+	Mid = (H + L) / 2, M = eval(Mid, InflFnCircuit, 0),
+	if 	M > 0 -> 
+			compute({Low, Mid}, InflFnCircuit);
+        true -> % works as an 'else' branch
+            compute({Mid, High}, InflFnCircuit)
+    end.
+
+eval(Flow, [Fn | RemFn] , Acc) ->
+	eval(Flow, RemFn, Acc + Fn(Flow));
+
+eval(_Flow, [], Acc) -> Acc. 
