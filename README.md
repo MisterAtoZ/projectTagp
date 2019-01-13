@@ -14,6 +14,13 @@ or to also get the shell
     $ rebar3 clean
     $ rebar3 shell
 
+## testModule and testModule2
+These two files are used to build the system step by step. With adding new functions to the circuit, more tests were added.
+These two files form the basis of digitalTwin.erl.
+
+## digitalTwin
+This is the file where the system gets build. It can make a system with N pipes, P Pumps, M Heatexchangers and 1 flowmeter. 
+
 ## Dialyzer tests
 Dialyzer test are done, it did not find any warnings. It does only check each file on its own so it won't check any functions that are called in another .erl-file.
 
@@ -50,5 +57,9 @@ This function does the same as startSimpleTestFluidumPumpFlowMeter().
 Afterwards it adds a Heatexchanger to the system.
 This Heatexchanger influences the temperature of the system.
 The influence is tested.
+
+### Testing on digitalTwin
+#### Test startNPipesPPumpsOFlowMetersMHeatex(N, P, M)
+This funcion builds the whole circuit. All the tests used in testModule and testModule2 are used to test this module.
 
 ## PropEr Tests
