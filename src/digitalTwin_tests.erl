@@ -11,11 +11,15 @@ startNPipesPPumpsOFlowMetersMHeatex_test_() ->
     {setup,
         fun return_startNPipesPPumpsOFlowMetersMHeatex/0,
         fun stop/1,
-        fun({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeters, HeatExchangers, N, P, O, M}) ->
+        fun({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}) ->
             [
-                checkTypesAreAliveAndListsHaveCorrectLength({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeters, HeatExchangers, N, P, O, M}),
-                checkAllPipesInst({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeters, HeatExchangers, N, P, O, M}),
-                checkAllPumpInst({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeters, HeatExchangers, N, P, O, M})
+                checkTypesAreAliveAndListsHaveCorrectLength({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}),
+                checkAllPipesInst({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}),
+                checkFluidumFunctions({ Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}),
+                checkAllPumpInst({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}),
+                checkPumpFlowInfluence({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}),
+                checkFlowmeter({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}),
+                checkHeatEx({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M})
             ]
         end
     }}.
@@ -28,11 +32,10 @@ startNPipesPPumpsOFlowMetersMHeatex_test_() ->
 return_startNPipesPPumpsOFlowMetersMHeatex() ->
     N = 10,
     P = 2,
-    O = 3, 
     M = 2,
     digitalTwin:startSurvivor(),
-    {ok, {Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeters, HeatExchangers}} = digitalTwin:startNPipesPPumpsOFlowMetersMHeatex(N, P, O, M),
-    {Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeters, HeatExchangers, N, P, O, M}.
+    {ok, {Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers}} = digitalTwin:startNPipesPPumpsOFlowMetersMHeatex(N, P, M),
+    {Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}.
 
 stop(_) ->
     ?debugFmt("Stoppen in digitalTwin_tests-file",[]),
@@ -41,9 +44,9 @@ stop(_) ->
 %===========================================================================================
 %THE ACTUAL TESTS
 %===========================================================================================
+%Tests if all the types exist and if the lengths are correct
 
-checkTypesAreAliveAndListsHaveCorrectLength({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeters, HeatExchangers, N, P, O, M}) ->
-    %Only the first three pipes get checked if they really exist, if they are okay, the rest will also be good
+checkTypesAreAliveAndListsHaveCorrectLength({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}) ->
     [PipeTypePID, FluidumType, PumpTypePID, FlowMeterTypePID, HeatExTypePID] = Types,
     [
         %Test if all the Types are alive
@@ -52,6 +55,7 @@ checkTypesAreAliveAndListsHaveCorrectLength({Types, Pipes, Connectors, Locations
         ?_assert(erlang:is_process_alive(PumpTypePID)),
         ?_assert(erlang:is_process_alive(FlowMeterTypePID)),
         ?_assert(erlang:is_process_alive(HeatExTypePID)),
+        ?_assert(erlang:is_process_alive(FlowMeter)),
         %All the alive tests for fluidum
         ?_assert(erlang:is_process_alive(FluidumType)),
         ?_assert(erlang:is_process_alive(FluidumInst)),
@@ -60,14 +64,13 @@ checkTypesAreAliveAndListsHaveCorrectLength({Types, Pipes, Connectors, Locations
         ?_assertEqual(2*N, length(Connectors)), %there are 2 connectors per pipe
         ?_assertEqual(N, length(Locations)),
         ?_assertEqual(P, length(Pumps)),
-        %?_assertEqual(O, length(FlowMeters)), %Flowmeters are not working correct yet
         ?_assertEqual(M, length(HeatExchangers))
     ].
 
 %--------------------------------------------------------------------------------------------------------------------------------
 %Tests of the pipeInsts
 
-checkAllPipesInst({_Types, Pipes, Connectors, Locations,_FluidumInst,_Pumps,_FlowMeters,_HeatExchangers, N,_P,_O,_M}) ->
+checkAllPipesInst({_Types, Pipes, Connectors, Locations,_FluidumInst,_Pumps,_FlowMeters,_HeatExchangers,_N,_P,_M}) ->
     Q = length(Pipes),
     checkAllPipesInst(Q, Pipes, Connectors, Locations, []).
 
@@ -98,7 +101,7 @@ checkAllPipesInst(Q, PipesToDo, ConnectorsToDo, LocationsToDo, TestsPipeInst) ->
 %-------------------------------------------------------------------------------------------------------------------------------
 %Tests of the fluidum
 
-checkFluidumFunctions({ Types, Pipes, Connectors, Locations, FluidumInst,_Pumps,_FlowMeters,_HeatExchangers, N,_P,_O,_M}) ->
+checkFluidumFunctions({ Types, Pipes, Connectors,_Locations, FluidumInst,_Pumps,_FlowMeters,_HeatExchangers,_N,_P,_M}) ->
     [_, FluidumType, _, _, _] = Types,
     %Testing function get_locations of fluidumInst 
     %This can get done when sending the message get_locations
@@ -112,7 +115,7 @@ checkFluidumFunctions({ Types, Pipes, Connectors, Locations, FluidumInst,_Pumps,
     %The next thing to test is: get_resource_circuit
     {ok, GetCircuit} = msg:get(FluidumInst, get_resource_circuit),
     %This function tests if the pipe is in the map and returns the tests
-    FluidumTests = check_resourceCircuit(Pipes, GetCircuit),
+    ResourceTests = check_resourceCircuit(Pipes, GetCircuit),
     
     %The last thing to test for fluidum is: discover_circuit
     [CRoot|_] = Connectors,
@@ -120,12 +123,13 @@ checkFluidumFunctions({ Types, Pipes, Connectors, Locations, FluidumInst,_Pumps,
     FluidumDiscoverTests = check_resourceCircuit(Connectors, DiscoveredCirvuit),
     ConnectorTest = ?_assertEqual(C1, CRoot),
 
-    [TestGetLocations, TestGetType, FluidumTests, FluidumDiscoverTests, ConnectorTest].
+    FluidumTests = [TestGetLocations, TestGetType, ResourceTests, FluidumDiscoverTests, ConnectorTest],
+    FluidumTests.
 
 %--------------------------------------------------------------------------------------------------------------------------------
 %Tests of the pumpInsts
 
-checkAllPumpInst({_Types,_Pipes,_Connectors,_Locations,_FluidumInst, Pumps,_FlowMeters,_HeatExchangers,_N, P,_O,_M}) ->
+checkAllPumpInst({_Types,_Pipes,_Connectors,_Locations,_FluidumInst, Pumps,_FlowMeters,_HeatExchangers,_N,_P,_M}) ->
     Q = length(Pumps),
     checkAllPumpInst(Q, Pumps, []).
 
@@ -209,6 +213,144 @@ checkAllPumpInst(Q, PumpsToDo, TestsPumpInst) ->
 	 	{error, "P has a negative value"}
     end.
 
+%-------------------------------------------------------------------------------------------
+%Tests if the flow influence of the pumps
+
+checkPumpFlowInfluence({_Types,_Pipes,_Connectors,_Locations,_FluidumInst, Pumps,_FlowMeters,_HeatExchangers,_N,_P,_M}) ->
+    QF = length(Pumps),
+    checkPumpFlowInfluence(QF, Pumps, []).
+
+checkPumpFlowInfluence(1, PumpsToDo, TestsPumpFlow) ->
+    [CheckPumpFlow|_ToDoPumps] = PumpsToDo,
+
+    %The pump should be turned off, lets check that first
+    {ok, OnOffState} = pumpInst:is_on(CheckPumpFlow),
+    FirstTests = ?_assertEqual(OnOffState,off),
+    NewTestsPumpFlow = [TestsPumpFlow | FirstTests],
+    %A basic flow has to be set
+    Flow = 5,    
+
+    %The flow should be zero now
+    {ok, FlowOff} = pumpInst:flow_influence(CheckPumpFlow),
+    FlowReferenceOff = 0, %Here could also the same formula as FlowReferenceOn be used, this should ofcourse also give 0
+    TestFlowOff = ?_assertEqual(FlowOff(Flow), FlowReferenceOff),
+    NewTestsPumpFlow2 = [NewTestsPumpFlow | TestFlowOff],
+
+    %Now the pump is turned on and the flow is checked
+    pumpInst:switch_on(CheckPumpFlow),
+    {ok, OnOffState2} = pumpInst:is_on(CheckPumpFlow),
+    TestPumpOn = ?_assertEqual(OnOffState2,on),
+    NewTestsPumpFlow3 = [NewTestsPumpFlow2 | TestPumpOn],
+
+    {ok, FlowOn} = pumpInst:flow_influence(CheckPumpFlow),
+    FlowReferenceOn = 250 - 5 * Flow - 2 * Flow * Flow,
+    TestFlowOn = ?_assertEqual(FlowOn(Flow), FlowReferenceOn),
+    NewTestsPumpFlow4 = [NewTestsPumpFlow3 | TestFlowOn],
+    
+    NewTestsPumpFlow4;
+
+checkPumpFlowInfluence(Q, PumpsToDo, TestsPumpFlow) ->
+    if Q > 0 ->
+        [CheckPumpFlow| ToDoPumps] = PumpsToDo,
+
+        %The pump should be turned off, lets check that first
+        {ok, OnOffState} = pumpInst:is_on(CheckPumpFlow),
+        FirstTests = ?_assertEqual(OnOffState,off),
+        NewTestsPumpFlow = [TestsPumpFlow | FirstTests],
+        %A basic flow has to be set
+        Flow = 5,    
+
+        %The flow should be zero now
+        {ok, FlowOff} = pumpInst:flow_influence(CheckPumpFlow),
+        FlowReferenceOff = 0, %Here could also the same formula as FlowReferenceOn be used, this should ofcourse also give 0
+        TestFlowOff = ?_assertEqual(FlowOff(Flow), FlowReferenceOff),
+        NewTestsPumpFlow2 = [NewTestsPumpFlow | TestFlowOff],
+
+        %Now the pump is turned on and the flow is checked
+        pumpInst:switch_on(CheckPumpFlow),
+        {ok, OnOffState2} = pumpInst:is_on(CheckPumpFlow),
+        TestPumpOn = ?_assertEqual(OnOffState2,on),
+        NewTestsPumpFlow3 = [NewTestsPumpFlow2 | TestPumpOn],
+
+        {ok, FlowOn} = pumpInst:flow_influence(CheckPumpFlow),
+        FlowReferenceOn = 250 - 5 * Flow - 2 * Flow * Flow,
+        TestFlowOn = ?_assertEqual(FlowOn(Flow), FlowReferenceOn),
+        NewTestsPumpFlow4 = [NewTestsPumpFlow3 | TestFlowOn],
+        
+        checkPumpFlowInfluence(Q-1, ToDoPumps, NewTestsPumpFlow4);
+    true ->
+        io:format("P has a negative value!~n"),
+	 	{error, "P has a negative value"}
+    end.
+
+%--------------------------------------------------------------------------------------------------
+%Tests of the Flowmeter
+
+checkFlowmeter({_Types,_Pipes,_Connectors,_Locations,_FluidumInst,_Pumps, FlowMeter,_HeatExchangers,_N,_P,_M}) ->
+    %First check if the processes are alive
+    FirstTests = ?_assert(erlang:is_process_alive(FlowMeter)),
+    
+    %If the process is alive, the functionality of the flowmeter can get tested
+    {ok, FlowMeasured} = flowMeterInst:measure_flow(FlowMeter),
+    Test2 = ?_assertEqual(FlowMeasured,{ok,real_flow}), 
+
+    %Testing the estimated value
+    % {ok, EstFlow} = flowMeterInst:estimate_flow(FlowMeterInst),
+    % Test3 = ?_assertEqual(EstFlow,iets), %This function does not work well
+
+    FlowMeterTests = [FirstTests, Test2],
+    FlowMeterTests.
+    %[FirstTests, Test2, Test3].
+
+
+%----------------------------------------------------------------------------------------------------
+%Tests of the HeatExchangers
+checkHeatEx({_Types,_Pipes,_Connectors,_Locations,_FluidumInst,_Pumps,_FlowMeter, HeatExchangers,_N,_P,_M}) ->
+    QH = length(HeatExchangers),
+    checkHeatEx(QH, HeatExchangers, []).
+
+checkHeatEx(1, HeatExToDo, TestsHeatEx) ->
+    [CheckHeatEx|_ToDoHeatEx] = HeatExToDo,
+
+    %First check if the processes of the heatex are alive
+    FirstTests = ?_assert(erlang:is_process_alive(CheckHeatEx)),
+    NewTestsHeatEx = [TestsHeatEx | FirstTests],
+
+    %The heatexchangers temp_influence(HeatExchangerInst_Pid) function is tested
+    {ok, {ok,Influence}} = heatExchangerInst:temp_influence(CheckHeatEx),
+    Flow = 5,
+    Difference = 1,
+    Temp = 20,
+    {ok, HeatExInfluence} = Influence(Flow, Temp),
+    CalculateInfluence = Temp + (Difference/Flow),
+    TestInfluence = ?_assertEqual(HeatExInfluence, CalculateInfluence),
+    NewTestsHeatEx2 = [NewTestsHeatEx | TestInfluence],
+
+    NewTestsHeatEx2;
+
+checkHeatEx(Q, HeatExToDo, TestsHeatEx) ->
+    if Q > 0 ->
+        [CheckHeatEx| ToDoHeatEx] = HeatExToDo,
+
+    %First check if the processes of the heatex are alive
+    FirstTests = ?_assert(erlang:is_process_alive(CheckHeatEx)),
+    NewTestsHeatEx = [TestsHeatEx | FirstTests],
+
+    %The heatexchangers temp_influence(HeatExchangerInst_Pid) function is tested
+    {ok, {ok,Influence}} = heatExchangerInst:temp_influence(CheckHeatEx),
+    Flow = 5,
+    Difference = 1,
+    Temp = 20,
+    {ok, HeatExInfluence} = Influence(Flow, Temp),
+    CalculateInfluence = Temp + (Difference/Flow),
+    TestInfluence = ?_assertEqual(HeatExInfluence, CalculateInfluence),
+    NewTestsHeatEx2 = [NewTestsHeatEx | TestInfluence],
+
+    checkHeatEx(Q-1, ToDoHeatEx, NewTestsHeatEx2);
+    true ->
+        io:format("M has a negative value!~n"),
+	 	{error, "M has a negative value"}
+    end.
 
 %===========================================================================================
 %HELP FUNCTIONS
