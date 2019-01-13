@@ -1,5 +1,5 @@
 -module(testModule2_tests).
--define(NOTEST, 1). %This line is to disable the testing for this module
+%-define(NOTEST, 1). %This line is to disable the testing for this module
 -include_lib("eunit/include/eunit.hrl").
 
 % -export([reverse_test/0]).
@@ -217,10 +217,9 @@ checkPipesWithFluidum({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, Fl
         ?_assert(erlang:is_process_alive(FluidumInst))
     ].
 
-checkFluidumFunctions({_PipeTypePID,Pipes,_Connectors, Locations, FluidumTyp, FluidumInst}) ->
+checkFluidumFunctions({_PipeTypePID, Pipes, Connectors, Locations, FluidumTyp, FluidumInst}) ->
     %Testing function get_locations of fluidumInst 
     %This can get done when sending the message get_locations
-    [Pipe1, Pipe2, Pipe3|_RestPipes] = Pipes,
     {ok, LocationsFluidum} = msg:get(FluidumInst,get_locations),
     TestGetLocations = ?_assertEqual(LocationsFluidum, []),
 
@@ -228,18 +227,18 @@ checkFluidumFunctions({_PipeTypePID,Pipes,_Connectors, Locations, FluidumTyp, Fl
     {ok, GetType} = msg:get(FluidumInst,get_type),
     TestGetType = ?_assertEqual(GetType,FluidumTyp),
 
-    %The last thing to test is: get_resource_circuit
+    %The next thing to test is: get_resource_circuit
     {ok, GetCircuit} = msg:get(FluidumInst, get_resource_circuit),
-    {ok, ResourceCircuit} = influence(maps:next(maps:iterator(GetCircuit)),[]),
-    %The function finds all the used pipes
-    %It needs to be compared to what the pipes should look like
-    %This function is made, so that the order of the pipes is: pipe1, pipe2, pipe3
-    CircuitComporator = [Pipe1, Pipe2, Pipe3],
-    TestGetCircuit = ?_assertEqual(CircuitComporator, ResourceCircuit),
-    %This test is not going to work because the CircuitComporator being a list and GetCircuit being a map
-    %There for the map should be converted to a list or the list to a map
+    %This function tests if the pipe is in the map and returns the tests
+    FluidumTests = check_resourceCircuit(Pipes, GetCircuit),
+    
+    %The last thing to test for fluidum is: discover_circuit
+    [CRoot|_] = Connectors,
+    {ok, {C1, DiscoveredCirvuit}} = fluidumTyp:discover_circuit(CRoot),
+    FluidumDiscoverTests = check_resourceCircuit(Connectors, DiscoveredCirvuit),
+    ConnectorTest = ?_assertEqual(C1, CRoot),
 
-    [TestGetLocations, TestGetType, TestGetCircuit].
+    [TestGetLocations, TestGetType, FluidumTests, FluidumDiscoverTests, ConnectorTest].
 
 checkPipesWithFluidumPump({PipeTypePID, Pipes, Connectors, Locations, FluidumTyp,_Fluidum, PumpTypePID, PumpInst}) ->
     [Pipe1, Pipe2, Pipe3|_RestPipes] = Pipes,
@@ -369,13 +368,18 @@ checkHeatEx({_PipeTypePID,_Pipes,_Connectors,_Locations,_FluidumTyp,_Fluidum,_Pu
 %HELP FUNCTIONS
 %===========================================================================================
 
-% circuitMapToList(MapCircuit) ->
-%     circuitMaptoList(MapCircuit, []).
+check_resourceCircuit(Pipes, GetCircuit) ->
+    check_resourceCircuit(Pipes, GetCircuit, []).
 
-% circuitMapToList(MapCircuit, ListCircuit) ->
 
-influence({C, _, Iter}, Acc) ->
-    {ok, InflFn} = apply(get_resource_instant, get_flow_influence, [C]),
-    influence(maps:next(Iter), [InflFn | Acc]);
+check_resourceCircuit([PipeToCheck | Rest], GetCircuit, Checks) ->
+    %?debugFmt("The CToCheck looks like: ~p~n", [PipeToCheck]),
+    %?debugFmt("And the map of the circuit looks like: ~p~n", [GetCircuit]),
+    {ok, PipeInMap} = maps:find(PipeToCheck, GetCircuit),
+    %?debugFmt("PipeInMap looks like: ~p~n", [PipeInMap]),
+    NewChecks = [Checks | ?_assertEqual(PipeInMap, processed)],
+    check_resourceCircuit(Rest, GetCircuit, NewChecks);
 
-influence(none, Acc) -> {ok, Acc}.
+
+check_resourceCircuit([], _GetCircuit, Checks) -> %%Can not be at the top!!
+    Checks.

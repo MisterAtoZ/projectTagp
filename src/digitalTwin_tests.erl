@@ -186,3 +186,19 @@ checkAllPumpInst(Q, PumpsToDo, TestsPumpInst) ->
 %===========================================================================================
 %HELP FUNCTIONS
 %===========================================================================================
+
+check_resourceCircuit(Pipes, GetCircuit) ->
+    check_resourceCircuit(Pipes, GetCircuit, []).
+
+
+check_resourceCircuit([PipeToCheck | Rest], GetCircuit, Checks) ->
+    %?debugFmt("The CToCheck looks like: ~p~n", [PipeToCheck]),
+    %?debugFmt("And the map of the circuit looks like: ~p~n", [GetCircuit]),
+    {ok, PipeInMap} = maps:find(PipeToCheck, GetCircuit),
+    %?debugFmt("PipeInMap looks like: ~p~n", [PipeInMap]),
+    NewChecks = [Checks | ?_assertEqual(PipeInMap, processed)],
+    check_resourceCircuit(Rest, GetCircuit, NewChecks);
+
+
+check_resourceCircuit([], _GetCircuit, Checks) -> %%Can not be at the top!!
+    Checks.
