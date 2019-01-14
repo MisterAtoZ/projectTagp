@@ -1,4 +1,5 @@
 -module(digitalTwin_tests).
+-export[findRefList/2, compute/2].
 %-define(NOTEST, 1). %This line is to disable the testing for this module
 -include_lib("eunit/include/eunit.hrl").
 
@@ -368,7 +369,7 @@ checkHeatEx(Q, HeatExToDo, TestsHeatEx) ->
     %NewTestsHeatEx2 = [NewTestsHeatEx | TestInfluence],
 
     NewTestsHeatEx = [FirstTests, TestInfluence],
-    checkHeatEx(Q-1, ToDoHeatEx, NewTestsHeatEx);
+    checkHeatEx(Q-1, ToDoHeatEx, TestsHeatEx++NewTestsHeatEx);
 
     true ->
         io:format("M has a negative value!~n"),

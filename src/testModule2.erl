@@ -346,5 +346,5 @@ getAllLocations([Pipe|OtherPipes],Locations) ->
 	getAllLocations(OtherPipes,LocationAdded);
 	
 getAllLocations([],Locations) ->
-	io:format("De lijst met de locations: ~p~n", [Locations]),
+	%io:format("De lijst met de locations: ~p~n", [Locations]),
 	Locations.
