@@ -28,7 +28,10 @@ prop_testEstimatedFlow() ->
 %===========================================================================================
 
 testFlowInfluence(Flow)->
-    {ok, {_PipeTypePID,_Pipes,_Connectors,_Locations,_FluidumTyp,_Fluidum,_PumpTypePID, PumpInst}} = testModule2:startSimpleTestFluidumPump(),
+    N = 5,
+    DifferenceHeatEx = [1.5, 0.5],
+    {ok, {_Types,_Pipes,_Connectors,_Locations,_FluidumInst, Pumps,_FlowMeter,_HeatExchangers}} = digitalTwin:startNPipesPPumpsOFlowMetersMHeatex(N, 1, 1, DifferenceHeatEx),
+    [PumpInst|_Rest] = Pumps,
     pumpInst:switch_on(PumpInst),
     {ok, InfluenceFunction} = pumpInst:flow_influence(PumpInst),
     Influence = InfluenceFunction(Flow),
@@ -37,8 +40,9 @@ testFlowInfluence(Flow)->
 
 
 testEstimatedFlow(N) ->
+    DifferenceHeatEx = [1.5, 0.5],
     %Makes a system with one pump, one flowmeter and one heatex but with more pipes to influence the flow
-    {ok, {_Types, Pipes,_Connectors,_Locations,_FluidumInst,_Pumps, FlowMeter,_HeatExchangers}} = digitalTwin:startNPipesPPumpsOFlowMetersMHeatex(N, 1, 1),
+    {ok, {_Types, Pipes,_Connectors,_Locations,_FluidumInst,_Pumps, FlowMeter,_HeatExchangers}} = digitalTwin:startNPipesPPumpsOFlowMetersMHeatex(N, 1, 1, DifferenceHeatEx),
     {ok, EstFlow} = flowMeterInst:estimate_flow(FlowMeter),
     %io:format("dit is de EstFlow: ~p~n", [EstFlow]),
     %io:format("dit is de lijst van Pipes: ~p~n", [Pipes]),
@@ -46,7 +50,7 @@ testEstimatedFlow(N) ->
     RefList = digitalTwin_tests:findRefList(Pipes, []),
     Interval = {0, 10},
 	RefFlow = digitalTwin_tests:compute(Interval, RefList),
-    io:format("dit is de RefFlow: ~p~n", [RefFlow]),
+    %io:format("dit is de RefFlow: ~p~n", [RefFlow]),
     timer:sleep(1),
     RefFlow==EstFlow.
 

@@ -12,15 +12,15 @@ startNPipesPPumpsOFlowMetersMHeatex_test_() ->
     {setup,
         fun return_startNPipesPPumpsOFlowMetersMHeatex/0,
         fun stop/1,
-        fun({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}) ->
+        fun({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M, DifferenceHeatEx}) ->
             [
-                checkTypesAreAliveAndListsHaveCorrectLength({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}),
-                checkAllPipesInst({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}),
-                checkFluidumFunctions({ Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}),
-                checkAllPumpInst({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}),
-                checkPumpFlowInfluence({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}),
-                checkFlowmeter({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}),
-                checkHeatEx({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M})
+                checkTypesAreAliveAndListsHaveCorrectLength({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M, DifferenceHeatEx}),
+                checkAllPipesInst({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M, DifferenceHeatEx}),
+                checkFluidumFunctions({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M, DifferenceHeatEx}),
+                checkAllPumpInst({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M, DifferenceHeatEx}),
+                checkPumpFlowInfluence({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M, DifferenceHeatEx}),
+                checkFlowmeter({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M, DifferenceHeatEx}),
+                checkHeatEx({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M, DifferenceHeatEx})
             ]
         end
     }}.
@@ -34,20 +34,22 @@ return_startNPipesPPumpsOFlowMetersMHeatex() ->
     N = 10,
     P = 2,
     M = 2,
+    DifferenceHeatEx = [1.5, 0.5],
     digitalTwin:startSurvivor(),
-    {ok, {Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers}} = digitalTwin:startNPipesPPumpsOFlowMetersMHeatex(N, P, M),
-    {Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}.
+    {ok, {Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers}} = digitalTwin:startNPipesPPumpsOFlowMetersMHeatex(N, P, M, DifferenceHeatEx),
+    {Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M, DifferenceHeatEx}.
 
 stop(_) ->
     %?debugFmt("Stoppen in digitalTwin_tests-file",[]),
     digitalTwin:stop().
+
 
 %===========================================================================================
 %THE ACTUAL TESTS
 %===========================================================================================
 %Tests if all the types exist and if the lengths are correct
 
-checkTypesAreAliveAndListsHaveCorrectLength({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M}) ->
+checkTypesAreAliveAndListsHaveCorrectLength({Types, Pipes, Connectors, Locations, FluidumInst, Pumps, FlowMeter, HeatExchangers, N, P, M,_DifferenceHeatEx}) ->
     [PipeTypePID, FluidumType, PumpTypePID, FlowMeterTypePID, HeatExTypePID] = Types,
     [
         %Test if all the Types are alive
@@ -71,7 +73,7 @@ checkTypesAreAliveAndListsHaveCorrectLength({Types, Pipes, Connectors, Locations
 %--------------------------------------------------------------------------------------------------------------------------------
 %Tests of the pipeInsts
 
-checkAllPipesInst({_Types, Pipes, Connectors, Locations,_FluidumInst,_Pumps,_FlowMeters,_HeatExchangers,_N,_P,_M}) ->
+checkAllPipesInst({_Types, Pipes, Connectors, Locations,_FluidumInst,_Pumps,_FlowMeters,_HeatExchangers,_N,_P,_M,_DifferenceHeatEx}) ->
     Q = length(Pipes),
     checkAllPipesInst(Q, Pipes, Connectors, Locations, []).
 
@@ -116,7 +118,7 @@ checkAllPipesInst(Q, PipesToDo, ConnectorsToDo, LocationsToDo, TestsPipeInst) ->
 %-------------------------------------------------------------------------------------------------------------------------------
 %Tests of the fluidum
 
-checkFluidumFunctions({ Types, Pipes, Connectors,_Locations, FluidumInst,_Pumps,_FlowMeters,_HeatExchangers,_N,_P,_M}) ->
+checkFluidumFunctions({ Types, Pipes, Connectors,_Locations, FluidumInst,_Pumps,_FlowMeters,_HeatExchangers,_N,_P,_M,_DifferenceHeatEx}) ->
     [_, FluidumType, _, _, _] = Types,
     %Testing function get_locations of fluidumInst 
     %This can get done when sending the message get_locations
@@ -144,7 +146,7 @@ checkFluidumFunctions({ Types, Pipes, Connectors,_Locations, FluidumInst,_Pumps,
 %--------------------------------------------------------------------------------------------------------------------------------
 %Tests of the pumpInsts
 
-checkAllPumpInst({_Types,_Pipes,_Connectors,_Locations,_FluidumInst, Pumps,_FlowMeters,_HeatExchangers,_N,_P,_M}) ->
+checkAllPumpInst({_Types,_Pipes,_Connectors,_Locations,_FluidumInst, Pumps,_FlowMeters,_HeatExchangers,_N,_P,_M,_DifferenceHeatEx}) ->
     Q = length(Pumps),
     checkAllPumpInst(Q, Pumps, []).
 
@@ -231,7 +233,7 @@ checkAllPumpInst(Q, PumpsToDo, TestsPumpInst) ->
 %-------------------------------------------------------------------------------------------
 %Tests if the flow influence of the pumps
 
-checkPumpFlowInfluence({_Types,_Pipes,_Connectors,_Locations,_FluidumInst, Pumps,_FlowMeters,_HeatExchangers,_N,_P,_M}) ->
+checkPumpFlowInfluence({_Types,_Pipes,_Connectors,_Locations,_FluidumInst, Pumps,_FlowMeters,_HeatExchangers,_N,_P,_M,_DifferenceHeatEx}) ->
     QF = length(Pumps),
     checkPumpFlowInfluence(QF, Pumps, []).
 
@@ -303,7 +305,7 @@ checkPumpFlowInfluence(Q, PumpsToDo, TestsPumpFlow) ->
 %--------------------------------------------------------------------------------------------------
 %Tests of the Flowmeter
 
-checkFlowmeter({_Types, Pipes,_Connectors,_Locations,_FluidumInst,_Pumps, FlowMeter,_HeatExchangers,_N,_P,_M}) ->
+checkFlowmeter({_Types, Pipes,_Connectors,_Locations,_FluidumInst,_Pumps, FlowMeter,_HeatExchangers,_N,_P,_M,_DifferenceHeatEx}) ->
     %First check if the processes are alive
     FirstTests = ?_assert(erlang:is_process_alive(FlowMeter)),
     
@@ -326,11 +328,11 @@ checkFlowmeter({_Types, Pipes,_Connectors,_Locations,_FluidumInst,_Pumps, FlowMe
 
 %----------------------------------------------------------------------------------------------------
 %Tests of the HeatExchangers
-checkHeatEx({_Types,_Pipes,_Connectors,_Locations,_FluidumInst,_Pumps,_FlowMeter, HeatExchangers,_N,_P,_M}) ->
+checkHeatEx({_Types,_Pipes,_Connectors,_Locations,_FluidumInst,_Pumps,_FlowMeter, HeatExchangers,_N,_P,_M, DifferenceHeatEx}) ->
     QH = length(HeatExchangers),
-    checkHeatEx(QH, HeatExchangers, []).
+    checkHeatEx(QH, HeatExchangers, [], DifferenceHeatEx).
 
-checkHeatEx(1, HeatExToDo, TestsHeatEx) ->
+checkHeatEx(1, HeatExToDo, TestsHeatEx, [Difference|_Rest]) ->
     [CheckHeatEx|_ToDoHeatEx] = HeatExToDo,
 
     %First check if the processes of the heatex are alive
@@ -340,7 +342,7 @@ checkHeatEx(1, HeatExToDo, TestsHeatEx) ->
     %The heatexchangers temp_influence(HeatExchangerInst_Pid) function is tested
     {ok, {ok,Influence}} = heatExchangerInst:temp_influence(CheckHeatEx),
     Flow = 5,
-    Difference = 1,
+    %Difference = 1,
     Temp = 20,
     {ok, HeatExInfluence} = Influence(Flow, Temp),
     CalculateInfluence = Temp + (Difference/Flow),
@@ -350,7 +352,7 @@ checkHeatEx(1, HeatExToDo, TestsHeatEx) ->
     NewTestsHeatEx = [FirstTests, TestInfluence],
     TestsHeatEx++NewTestsHeatEx;
 
-checkHeatEx(Q, HeatExToDo, TestsHeatEx) ->
+checkHeatEx(Q, HeatExToDo, TestsHeatEx, [Difference| RestDifference]) ->
     if Q > 0 ->
         [CheckHeatEx| ToDoHeatEx] = HeatExToDo,
 
@@ -361,7 +363,7 @@ checkHeatEx(Q, HeatExToDo, TestsHeatEx) ->
     %The heatexchangers temp_influence(HeatExchangerInst_Pid) function is tested
     {ok, {ok,Influence}} = heatExchangerInst:temp_influence(CheckHeatEx),
     Flow = 5,
-    Difference = 1,
+    %Difference = 1,
     Temp = 20,
     {ok, HeatExInfluence} = Influence(Flow, Temp),
     CalculateInfluence = Temp + (Difference/Flow),
@@ -369,7 +371,7 @@ checkHeatEx(Q, HeatExToDo, TestsHeatEx) ->
     %NewTestsHeatEx2 = [NewTestsHeatEx | TestInfluence],
 
     NewTestsHeatEx = [FirstTests, TestInfluence],
-    checkHeatEx(Q-1, ToDoHeatEx, TestsHeatEx++NewTestsHeatEx);
+    checkHeatEx(Q-1, ToDoHeatEx, TestsHeatEx++NewTestsHeatEx, RestDifference);
 
     true ->
         io:format("M has a negative value!~n"),

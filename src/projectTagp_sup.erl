@@ -41,7 +41,8 @@ init([]) ->
     %testModule2:startSimpleTestFluidumPump(),
     digitalTwin:startSurvivor(),
     %testModule2:startSimpleTestFluidumPumpFlowMeter(),
-    digitalTwin:startNPipesPPumpsOFlowMetersMHeatex(8, 3, 2),
+    DifferenceHeatEx = [1.5, 0.5],
+    digitalTwin:startNPipesPPumpsOFlowMetersMHeatex(8, 3, 2, DifferenceHeatEx),
     % {ok, FlowMeterTypePID} = flowMeterTyp:create(),
     % digitalTwin:makeFlowMeters(2, [], FlowMeterTypePID, Pipes),
     {ok, {{one_for_all, 0, 1}, []}}.

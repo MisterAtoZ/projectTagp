@@ -1,5 +1,5 @@
 -module(digitalTwin).
--export([startNPipesPPumpsOFlowMetersMHeatex/3]).
+-export([startNPipesPPumpsOFlowMetersMHeatex/4]).
 -export([makePipes/3, makePumps/4]).
 -export([makeHeatExchangers/5]).
 -export([connectPipes/1]).
@@ -7,7 +7,7 @@
 -export([stop/0, startSurvivor/0, getAllConnectors/1]).
 
 
-startNPipesPPumpsOFlowMetersMHeatex(N, P, M) ->
+startNPipesPPumpsOFlowMetersMHeatex(N, P, M, DifferenceHeatEx) ->
 	
 	%This function strives to:
 	%1) Create N pipe instances
@@ -56,9 +56,9 @@ startNPipesPPumpsOFlowMetersMHeatex(N, P, M) ->
 		%Adding the HeatExchanger
 		{ok, HeatExTypePID} = heatExchangerTyp:create(),
 		%To make the heatexchanger, folowing parameters are necessary: Host, HeatExchangerTyp_Pid, PipeInst_Pid, HE_link_spec
-		Difference = 1,
+		%Difference = 1,
 
-		{ok, {HeatExchangers, _PipesFreeAfterHeatEx}} = makeHeatExchangers(M, [], HeatExTypePID, PipesFreeAfterFlowMeter, Difference), %AANPASSEN NA TOEVOEGEN FLOWMETER!!
+		{ok, {HeatExchangers, _PipesFreeAfterHeatEx}} = makeHeatExchangers(M, [], HeatExTypePID, PipesFreeAfterFlowMeter, DifferenceHeatEx), %AANPASSEN NA TOEVOEGEN FLOWMETER!!
 		%io:format("The Heatexchangers are: ~p~n", [HeatExchangers]),
 		io:format("~p HeatExchangers are made ~n", [M]),
 
@@ -193,22 +193,24 @@ makePumps(P, PumpList, PumpTypePID, Pipes) ->
 	end.
 
 
-makeHeatExchangers(1, HeatExList, HeatExTypePID, Pipes, Difference) ->
-    HE_link_spec = #{delta => Difference},
+makeHeatExchangers(1, HeatExList, HeatExTypePID, Pipes, DifferenceHeatEx) ->
     {PipesHeatExList, PipesNotUsed} = lists:split(1,Pipes),
+	[Difference | _RestDifference] = DifferenceHeatEx,
+	HE_link_spec = #{delta => Difference},
     io:format("the used pipe is is ~p ~n", [PipesHeatExList]),
 	{ok,HeatExInst} = heatExchangerInst:create(self(), HeatExTypePID, PipesHeatExList, HE_link_spec),
     {ok,{HeatExList ++[HeatExInst], PipesNotUsed}};
 
-makeHeatExchangers(M, HeatExList, HeatExTypePID, Pipes, Difference) ->
+makeHeatExchangers(M, HeatExList, HeatExTypePID, Pipes, DifferenceHeatEx) ->
 	if M > 1 ->
+		{PipesHeatExList, PipesNotUsed} = lists:split(1,Pipes),
+		[Difference | RestDifference] = DifferenceHeatEx,
         HE_link_spec = #{delta => Difference},
-        {PipesHeatExList, PipesNotUsed} = lists:split(1,Pipes),
         io:format("the used pipe is ~p ~n", [PipesHeatExList]),
         {ok,HeatExInst} = heatExchangerInst:create(self(), HeatExTypePID, PipesHeatExList, HE_link_spec),
         NewHeatExList = HeatExList ++[HeatExInst],
         M2 = M-1,
-        makeHeatExchangers(M2, NewHeatExList, HeatExTypePID, PipesNotUsed, Difference);
+        makeHeatExchangers(M2, NewHeatExList, HeatExTypePID, PipesNotUsed, RestDifference);
 	 true ->
 		io:format("M has a negative value!~n"),
 	 	{error, "M has a negative value"}
