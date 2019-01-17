@@ -2,6 +2,12 @@
 
 -export([create/2, init/2, get_resource_circuit/1]).
 
+-spec create(_,_) -> {'ok',pid()}.
+-spec init(_,_) -> no_return().
+-spec get_resource_circuit(_) -> any().
+-spec loop(_,_,_) -> no_return().
+
+
 create(Root_ConnectorPid, ResTyp_Pid) -> 
 	{ok, spawn(?MODULE, init, [Root_ConnectorPid, ResTyp_Pid])}.
 

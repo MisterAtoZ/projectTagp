@@ -1,6 +1,13 @@
 -module(survivor).
 -export([start/0, entry/1, init/0]). 
 
+-spec start() -> 'true'.
+-spec entry(_) -> 'true'.
+-spec init() -> 'ok'.
+-spec delete() -> 'true'.
+-spec loop() -> 'ok'.
+
+
 start() ->
 	register(survivor, spawn(?MODULE, init, [])).
 

@@ -2,12 +2,11 @@
 %-define(NOTEST, 1). %This line is to disable the testing for this module
 -include_lib("eunit/include/eunit.hrl").
 
-% -export([reverse_test/0]).
-% -export([length_test/0]).
-% reverse_test() -> lists:reverse([1,2,3]).
-% length_test() -> ?assert(length([1,2,3]) =:= 3).
-% basic_test_() ->
-%        fun () -> ?assert(1 + 1 =:= 2) end.
+-spec start_test_() -> {[1..255,...],{'foreach',fun(() -> {_,_,_,_}),fun((_) -> any()),[fun((_) -> any()),...]}}.
+-spec return_start() -> {_,_,_,_}.
+-spec stop(_) -> any().
+-spec checkPipes({_,nonempty_maybe_improper_list(),[[any(),...],...],[any(),...]}) -> [{49 | 50 | 51 | 52 | 53 | 54 | 55 | 56 | 57 | 58 | 59 | 60 | 61,fun(() -> any())},...].
+
 
 %===========================================================================================
 %TESTS DESCRIPTIONS

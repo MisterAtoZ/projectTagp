@@ -1,6 +1,11 @@
 -module(pipeInst).
 -export([create/2, init/2, get_flow_influence/1]).
 
+-spec create(_,_) -> {'ok',pid()}.
+-spec init(_,_) -> no_return().
+-spec get_flow_influence(_) -> any().
+-spec loop(_,_,_) -> no_return().
+
 
 create(Host, ResTyp_Pid) -> {ok, spawn(?MODULE, init, [Host, ResTyp_Pid])}.
 

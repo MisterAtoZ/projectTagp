@@ -3,6 +3,13 @@
 % -export([commission/1, activate/1]).
 % -export([deactivate/1, decommission/1]).
 
+-spec create(_,_,_,_) -> {'ok',pid()}.
+-spec init(_,_,_,_) -> no_return().
+-spec estimate_flow(_) -> any().
+-spec measure_flow(_) -> any().
+-spec loop(_,_,_,_) -> no_return().
+
+
 % FlowMeter is a pipe and possibly a more complex resource;  
 % this resource instance is passed to the create function.
 % RealWorldCmdFn is a function to read out the real-world flowMeter. 

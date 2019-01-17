@@ -1,6 +1,10 @@
 -module(heatExchangerTyp).
 -export([create/0, init/0]).
 
+-spec create() -> {'ok',pid()}.
+-spec init() -> no_return().
+-spec loop() -> no_return().
+
 
 create() -> {ok, spawn(?MODULE, init, [])}. 
 

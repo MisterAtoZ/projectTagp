@@ -1,6 +1,9 @@
 -module(testModule).
 -export([start/0, stop/0]).
 
+-spec start() -> {'ok',{_,[any(),...],[[any(),...],...],[any(),...]}}.
+-spec stop() -> {'ok','stopped'}.
+
 
 start() ->
 	survivor2:start(),

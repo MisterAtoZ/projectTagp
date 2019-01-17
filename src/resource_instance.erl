@@ -3,7 +3,15 @@
 -export([list_connectors/1, list_locations/1]).
 -export([get_flow_influence/1]).
 -export([get_type/1, get_ops/1, get_state/1]).
-%%% More to follow later. 
+
+-spec create(atom() | tuple(),[any()]) -> any().
+-spec list_connectors(_) -> any().
+-spec list_locations(_) -> any().
+-spec get_type(_) -> any().
+-spec get_ops(_) -> any().
+-spec get_state(_) -> any().
+-spec get_flow_influence(_) -> any().
+
 
 create(Selector, Environment) -> 
 	apply(Selector, create, Environment).

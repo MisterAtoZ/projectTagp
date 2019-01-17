@@ -5,6 +5,18 @@
 
 -export([init/2, test/0]). % for internal use only. 
 
+-spec create(_,_) -> pid().
+-spec init(_,_) -> 'stopped'.
+-spec connect(atom() | pid() | port() | {atom(),atom()},_) -> {'connect',_}.
+-spec disconnect(atom() | pid() | port() | {atom(),atom()}) -> 'disconnect'.
+-spec get_connected(_) -> any().
+-spec get_ResInst(_) -> any().
+-spec get_type(_) -> any().
+-spec discard(atom() | pid() | port() | {atom(),atom()}) -> 'discard'.
+-spec loop(_,_,_) -> 'stopped'.
+-spec test() -> {pid(),pid()}.
+
+
 create(ResInst_Pid, ConnectTyp_Pid) -> 
 	spawn(?MODULE, init, [ResInst_Pid, ConnectTyp_Pid]).
 

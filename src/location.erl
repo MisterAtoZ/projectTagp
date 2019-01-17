@@ -2,6 +2,17 @@
 -export([create/2, get_ResInst/1, get_Visitor/1, get_Type/1, arrival/2, departure/1, dispose/1]).
 -export([init/2]). 
 
+-spec create(_,_) -> pid().
+-spec init(_,_) -> 'stopped'.
+-spec get_ResInst(_) -> any().
+-spec get_Visitor(_) -> any().
+-spec get_Type(_) -> any().
+-spec arrival(atom() | pid() | port() | {atom(),atom()},_) -> {'arrived',_}.
+-spec departure(atom() | pid() | port() | {atom(),atom()}) -> 'departed'.
+-spec dispose(atom() | pid() | port() | {atom(),atom()}) -> 'remove'.
+-spec loop(_,_,_) -> 'stopped'.
+
+
 create(ResInst_Pid, LocationTyp_Pid) ->
 	spawn(?MODULE, init, [ResInst_Pid, LocationTyp_Pid]).
 	

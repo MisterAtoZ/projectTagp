@@ -4,6 +4,12 @@
 % -export([get_initial_state/3, get_connections_list/2]). % use resource_type
 % -export([update/3, execute/7, refresh/4, cancel/4, update/7, available_ops/2]). 
 
+-spec create() -> {'ok',pid()}.
+-spec init() -> no_return().
+-spec loop() -> no_return().
+-spec flow(_,'off' | 'on') -> number().
+
+
 create() -> {ok, spawn(?MODULE, init, [])}.
 
 init() -> 

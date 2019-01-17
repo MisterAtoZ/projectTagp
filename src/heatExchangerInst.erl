@@ -1,6 +1,12 @@
 -module(heatExchangerInst).
 -export([create/4, init/4, temp_influence/1]).
 
+-spec create(_,_,_,_) -> {'ok',pid()}.
+-spec init(_,_,_,_) -> no_return().
+-spec temp_influence(_) -> any().
+-spec loop(_,_,_,_,_) -> no_return().
+
+
 % HeatExchanger is a pipe and more; this pipe instance is passed to the create function.
 % HeatExchangers have a HE_link to, typically, another HeatExchanger. The link provides 
 % a function that models the mutual effect on the temperature of the flows on either side. 

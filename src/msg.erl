@@ -3,6 +3,14 @@
 -export([get/2, get/3, set_ack/2, set_ack/3]).
 -export([test/0]). 
 
+-spec get(atom() | pid() | port() | {atom(),atom()},_) -> {'ok',_} | {'error','timed_out',atom() | pid() | port() | {atom(),atom()},_,reference()}.
+-spec get(atom() | pid() | port() | {atom(),atom()},_,_) -> {'ok',_} | {'error','timed_out',atom() | pid() | port() | {atom(),atom()},_,reference()}.
+-spec set_ack(atom() | pid() | port() | {atom(),atom()},_) -> {'ok',_} | {'error','timed_out',atom() | pid() | port() | {atom(),atom()},_,reference()}.
+-spec set_ack(atom() | pid() | port() | {atom(),atom()},_,_) -> {'ok',_} | {'error','timed_out',atom() | pid() | port() | {atom(),atom()},_,reference()}.
+-spec replier(reference()) -> fun((_) -> {reference(),_}).
+-spec test() -> {'ok',_} | {'error','timed_out',atom() | pid() | port() | {atom(),atom()},_,reference()}.
+
+
 get(Pid, Key) ->
 	Pid ! {Key, replier(R = make_ref())},
 	receive

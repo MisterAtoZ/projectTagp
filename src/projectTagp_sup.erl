@@ -13,6 +13,10 @@
 %% Supervisor callbacks
 -export([init/1]).
 
+-spec start_link() -> 'ignore' | {'error',_} | {'ok',pid()}.
+-spec init([]) -> {'ok',{{'one_for_all',0,1},[]}}.
+
+
 -define(SERVER, ?MODULE).
 
 %%====================================================================
@@ -32,19 +36,9 @@ start_link() ->
 %% Child :: {Id,StartFunc,Restart,Shutdown,Type,Modules}
 init([]) ->
     observer:start(),
-	%survivor2:start(),
-    %testModule2:startNPipes(5),
-    %testModule:start(),
-    %testModule_tests:test(),
-    %eunit:test(testModule2),
-    %testModule2:startSurvivor(),
-    %testModule2:startSimpleTestFluidumPump(),
     digitalTwin:startSurvivor(),
-    %testModule2:startSimpleTestFluidumPumpFlowMeter(),
     DifferenceHeatEx = [1.5, 0.5],
-    digitalTwin:startNPipesPPumpsOFlowMetersMHeatex(8, 3, 2, DifferenceHeatEx),
-    % {ok, FlowMeterTypePID} = flowMeterTyp:create(),
-    % digitalTwin:makeFlowMeters(2, [], FlowMeterTypePID, Pipes),
+    digitalTwin:startNPipesPPumpsOFlowMetersMHeatex(10, 3, 2, DifferenceHeatEx),
     {ok, {{one_for_all, 0, 1}, []}}.
 
 %%====================================================================

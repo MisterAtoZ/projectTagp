@@ -2,12 +2,33 @@
 %-define(NOTEST, 1). %This line is to disable the testing for this module
 -include_lib("eunit/include/eunit.hrl").
 
-% -export([reverse_test/0]).
-% -export([length_test/0]).
-% reverse_test() -> lists:reverse([1,2,3]).
-% length_test() -> ?assert(length([1,2,3]) =:= 3).
-% basic_test_() ->
-%        fun () -> ?assert(1 + 1 =:= 2) end.
+-spec startSimpleTest_test_() -> {[1..255,...],{'foreach',fun(() -> {_,_,_,_}),fun((_) -> any()),[fun((_) -> any()),...]}}.
+-spec startNPipes_test_() -> {[1..255,...],{'setup',fun(() -> {_,_,_,_,_}),fun((_) -> any()),fun(({_,_,_,_,_}) -> [any(),...])}}.
+-spec startSimpleTestFluidum_test_() -> {[1..255,...],{'setup',fun(() -> any()),fun((_) -> any()),fun((_) -> any())}}.
+-spec startSimpleTestFluidumPump_test_() -> {[1..255,...],{'setup',fun(() -> any()),fun((_) -> any()),fun((_) -> any())}}.
+-spec startSimpleTestFluidumPumpFlowMeter_test_() -> {[1..255,...],{'setup',fun(() -> any()),fun((_) -> any()),fun((_) -> any())}}.
+-spec startSimpleTestFluidumPumpFlowMeterHeatEx_test_() -> {[1..255,...],{'setup',fun(() -> any()),fun((_) -> any()),fun((_) -> any())}}.
+-spec return_startSimpleTest() -> {_,_,_,_}.
+-spec stop(_) -> any().
+-spec return_startNPipes() -> {_,_,_,_,5}.
+-spec return_startSimpleTestFluidum() -> {_,_,_,_,_,_}.
+-spec return_startSimpleTestFluidumPump() -> {_,_,_,_,_,_,_,_}.
+-spec return_startSimpleTestFluidumPumpFlowMeter() -> {_,_,_,_,_,_,_,_,_,_}.
+-spec return_startSimpleTestFluidumPumpFlowMeterHeatEx() -> {_,_,_,_,_,_,_,_,_,_,_,_}.
+-spec checkPipes({_,nonempty_maybe_improper_list(),[[any(),...],...],[any(),...]}) -> [{150 | 151 | 152 | 153 | 154 | 155 | 156 | 157 | 158 | 159 | 160 | 161 | 162,fun(() -> any())},...].
+-spec checkNPipes({_,nonempty_maybe_improper_list(),nonempty_maybe_improper_list(),nonempty_maybe_improper_list(),_}) -> [{1..255,fun(() -> any())},...].
+-spec checkPipesWithFluidum({_,nonempty_maybe_improper_list(),[any(),...],[any(),...],_,_}) -> [{1..255,fun(() -> any())},...].
+-spec checkFluidumFunctions({_,[any()],[any(),...],_,_,_}) -> [[{_,_}] | {219 | 223 | 234,fun(() -> any())},...].
+-spec checkPipesWithFluidumPump({_,nonempty_maybe_improper_list(),[any(),...],[any(),...],_,_,_,_}) -> [{1..1114111,fun(() -> any())},...].
+-spec checkPumpFunctions({_,_,_,_,_,_,_,_}) -> [[{_,_},...] | {277 | 283 | 289 | 295,fun(() -> any())},...].
+-spec checkPumpFlowInfluence({_,_,_,_,_,_,_,_}) -> [[{_,_},...] | {313 | 318 | 322,fun(() -> any())},...].
+-spec checkFlowmeter({_,nonempty_maybe_improper_list(),_,_,_,_,_,_,_,_}) -> [[{_,_},...] | {335 | 345,fun(() -> any())},...].
+-spec checkHeatEx({_,_,_,_,_,_,_,_,_,_,_,_}) -> [[{_,_},...] | {362,fun(() -> any())},...].
+-spec check_resourceCircuit([any()],_) -> [{381,fun(() -> any())}].
+-spec check_resourceCircuit([any()],_,[{381,fun(() -> any())}]) -> [{381,fun(() -> any())}].
+-spec compute({number(),number()},[any(),...]) -> float().
+-spec eval(number(),[fun((_) -> any())],number()) -> number().
+
 
 %===========================================================================================
 %TESTS DESCRIPTIONS

@@ -3,6 +3,15 @@
 % -export([commission/1, activate/1]).
 % -export([deactivate/1, decommission/1]).
 
+-spec create(_,_,_,_) -> {'ok',pid()}.
+-spec init(_,_,_,_) -> no_return().
+-spec switch_off(atom() | pid() | port() | {atom(),atom()}) -> 'switchOff'.
+-spec switch_on(atom() | pid() | port() | {atom(),atom()}) -> 'switchOn'.
+-spec is_on(_) -> any().
+-spec flow_influence(_) -> any().
+-spec loop(_,_,_,_) -> no_return().
+
+
 % Pump is a pipe and more; this pipe instance is passed to the create function.
 % RealWorldCmdFn is a function to transfer commands to the real-world pump. 
 

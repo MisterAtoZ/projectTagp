@@ -21,6 +21,11 @@ These two files form the basis of digitalTwin.erl.
 ## digitalTwin
 This is the file where the digital twin system gets build. It can make a system with N pipes, P Pumps, M Heatexchangers and 1 flowmeter. To make this system, the amount of pipes needs to be atleast the amount of the sum of the pumps, heatexchangers and the flowmeter. 
 
+## TypEr
+TypEr is a handy tool that generates all the -spec() lines. These lines are necessary for the dialyzer to test them. The command below is used for each .erl file to generate the -spec() lines. The command has to be done in the /src map or the path in the command has to be changed.
+
+    $ typer FILENAME.erl
+
 ## Dialyzer tests
 Dialyzer test are done, it did not find any warnings. It does only check each file on its own so it won't check any functions that are called in another .erl-file.
 

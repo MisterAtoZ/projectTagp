@@ -3,6 +3,26 @@
 %-define(NOTEST, 1). %This line is to disable the testing for this module
 -include_lib("eunit/include/eunit.hrl").
 
+-spec startNPipesPPumpsOFlowMetersMHeatex_test_() -> {[1..255,...],{'setup',fun(() -> any()),fun((_) -> any()),fun((_) -> any())}}.
+-spec return_startNPipesPPumpsOFlowMetersMHeatex() -> {_,_,_,_,_,_,_,_,10,2,2,[float(),...]}.
+-spec stop(_) -> any().
+-spec checkTypesAreAliveAndListsHaveCorrectLength({[any(),...],_,_,_,_,_,_,_,_,_,_,_}) -> [{56 | 57 | 58 | 59 | 60 | 61 | 63 | 64 | 66 | 67 | 68 | 69 | 70,fun(() -> any())},...].
+-spec checkAllPipesInst({_,[any(),...],nonempty_maybe_improper_list(),nonempty_maybe_improper_list(),_,_,_,_,_,_,_,_}) -> [{85 | 86 | 87 | 88 | 106 | 107 | 108 | 109,fun(() -> any())},...].
+-spec checkAllPipesInst(pos_integer(),[any(),...],nonempty_maybe_improper_list(),nonempty_maybe_improper_list(),[{106 | 107 | 108 | 109,fun(() -> any())}]) -> [{85 | 86 | 87 | 88 | 106 | 107 | 108 | 109,fun(() -> any())},...].
+-spec checkFluidumFunctions({[any(),...],[any()],[any(),...],_,_,_,_,_,_,_,_,_}) -> [[{_,_}] | {126 | 130 | 141,fun(() -> any())},...].
+-spec checkAllPumpInst({_,_,_,_,_,[any()],_,_,_,_,_,_}) -> [{155 | 161 | 167 | 173 | 179 | 185 | 194 | 200 | 206 | 212 | 218 | 224,fun(() -> any())},...] | {'error',[32 | 80 | 97 | 101 | 103 | 104 | 105 | 108 | 110 | 115 | 116 | 117 | 118,...]}.
+-spec checkAllPumpInst(non_neg_integer(),[any()],[{194 | 200 | 206 | 212 | 218 | 224,fun(() -> any())}]) -> [{155 | 161 | 167 | 173 | 179 | 185 | 194 | 200 | 206 | 212 | 218 | 224,fun(() -> any())},...] | {'error',[32 | 80 | 97 | 101 | 103 | 104 | 105 | 108 | 110 | 115 | 116 | 117 | 118,...]}.
+-spec checkPumpFlowInfluence({_,_,_,_,_,[any()],_,_,_,_,_,_}) -> [{245 | 253 | 259 | 264 | 276 | 284 | 290 | 295,fun(() -> any())},...] | {'error',[32 | 80 | 97 | 101 | 103 | 104 | 105 | 108 | 110 | 115 | 116 | 117 | 118,...]}.
+-spec checkPumpFlowInfluence(non_neg_integer(),[any()],[{276 | 284 | 290 | 295,fun(() -> any())}]) -> [{245 | 253 | 259 | 264 | 276 | 284 | 290 | 295,fun(() -> any())},...] | {'error',[32 | 80 | 97 | 101 | 103 | 104 | 105 | 108 | 110 | 115 | 116 | 117 | 118,...]}.
+-spec checkFlowmeter({_,[any()],_,_,_,_,_,_,_,_,_,_}) -> [{310 | 314 | 322,fun(() -> any())},...].
+-spec checkHeatEx({_,_,_,_,_,_,_,[any()],_,_,_,nonempty_maybe_improper_list()}) -> [{339 | 349 | 360 | 370,fun(() -> any())},...] | {'error',[32 | 77 | 97 | 101 | 103 | 104 | 105 | 108 | 110 | 115 | 116 | 117 | 118,...]}.
+-spec checkHeatEx(non_neg_integer(),[any()],[{360 | 370,fun(() -> any())}],nonempty_maybe_improper_list()) -> [{339 | 349 | 360 | 370,fun(() -> any())},...] | {'error',[32 | 77 | 97 | 101 | 103 | 104 | 105 | 108 | 110 | 115 | 116 | 117 | 118,...]}.
+-spec check_resourceCircuit([any()],_) -> [{394,fun(() -> any())}].
+-spec check_resourceCircuit([any()],_,[{394,fun(() -> any())}]) -> [{394,fun(() -> any())}].
+-spec findRefList([any()],_) -> any().
+-spec compute({_,_},_) -> float().
+-spec eval(_,[fun((_) -> any())],number()) -> number().
+
 %===========================================================================================
 %TESTS DESCRIPTIONS
 %===========================================================================================

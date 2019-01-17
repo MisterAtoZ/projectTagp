@@ -1,6 +1,12 @@
 -module(survivor2).
 -export([start/0, entry/1, init/0]). 
 
+-spec start() -> 'true'.
+-spec entry(_) -> 'true'.
+-spec init() -> 'ok'.
+-spec loop() -> 'ok'.
+
+
 start() ->
 	(whereis(survivor) =:= undefined) orelse unregister(survivor), 
 	register(survivor, spawn(?MODULE, init, [])).

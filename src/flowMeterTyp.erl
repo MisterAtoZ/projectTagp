@@ -4,6 +4,15 @@
 % -export([get_initial_state/3, get_connections_list/2]). % use resource_type
 % -export([update/3, execute/7, refresh/4, cancel/4, update/7, available_ops/2]). 
 
+-spec create() -> {'ok',pid()}.
+-spec init() -> no_return().
+-spec loop() -> no_return().
+-spec computeFlow(map()) -> float().
+-spec influence('none' | {_,_,maps:iterator()},[any()]) -> {'ok',[any()]}.
+-spec compute({number(),number()},[any()]) -> float().
+-spec eval(number(),[fun((_) -> any())],number()) -> number().
+
+
 create() -> {ok, spawn(?MODULE, init, [])}.
 
 init() -> 

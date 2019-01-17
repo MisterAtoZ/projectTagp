@@ -6,18 +6,41 @@
 -export([fillCircuitWithFluidum/2]).
 -export([stop/0, startSurvivor/0, getAllConnectors/1]).
 
+-spec startNPipesPPumpsOFlowMetersMHeatex(_,_,_,_) -> {'error',[1..255,...]} | {'ok',{[any(),...],[any(),...],nonempty_maybe_improper_list(),[any()],_,[any(),...],_,[any(),...]}}.
+-spec stop() -> {'ok','stopped'}.
+-spec startSurvivor() -> {'ok','started'}.
+-spec makePipes(_,_,_) -> [any(),...] | {'error',[32 | 78 | 97 | 101 | 103 | 104 | 105 | 108 | 110 | 115 | 116 | 117 | 118,...]}.
+-spec connectPipes([any(),...]) -> any().
+-spec connectPipes(_,_,[any()]) -> any().
+-spec getAllConnectors([any()]) -> any().
+-spec getAllConnectors([any()],_) -> any().
+-spec getAllLocations([any(),...]) -> [any()].
+-spec getAllLocations([any()],[any()]) -> [any()].
+-spec fillCircuitWithFluidum(_,[any()]) -> 'ok'.
+-spec makePumps(_,_,_,_) -> {'error',[32 | 80 | 97 | 101 | 103 | 104 | 105 | 108 | 110 | 115 | 116 | 117 | 118,...]} | {'ok',{[any(),...],[any()]}}.
+-spec makeHeatExchangers(_,_,_,_,_) -> {'error',[32 | 77 | 97 | 101 | 103 | 104 | 105 | 108 | 110 | 115 | 116 | 117 | 118,...]} | {'ok',{[any(),...],[any()]}}.
+
 
 startNPipesPPumpsOFlowMetersMHeatex(N, P, M, DifferenceHeatEx) ->
 	
 	%This function strives to:
-	%1) Create N pipe instances
-	%2) Create a network containing all N pipes, connecting them in a circle
+	%1) Create N pipe instances and connect them
+	%2) Fill the system with fluidum
+	%3) Create P Pumps	
+	%2) Create 1 Flowmeter
+	%2) Create M Heatexchangers with the DifferenceHeatEx
+
 	
     %First it is checked that there are enough pipes to support the system
 	if N < P+1+M ->
 		Short = (P+1+M)-N,
 		io:format("There are not enough pipes to support the system! ~p more are needed~n", [Short]),
 	 	{error, "There are not enough pipes to support the system!"};
+
+	length(DifferenceHeatEx) < M ->
+		io:format("There are not enough DifferenceHeatEx defined to support the system! ~p more are needed~n", [length(DifferenceHeatEx)]),
+		{error, "There are not enough DifferenceHeatEx defined to support the system!"};
+
 	true ->
 		{ok,PipeTypePID} = resource_type:create(pipeTyp,[]),
 		Pipes = makePipes(N,[], PipeTypePID),
@@ -50,7 +73,7 @@ startNPipesPPumpsOFlowMetersMHeatex(N, P, M, DifferenceHeatEx) ->
 		RealWorldCmdFnFlowMeter = fun() ->	{ok, real_flow} end,
 		{ok, FlowMeter} = flowMeterInst:create(self(), FlowMeterTypePID, Pijpke, RealWorldCmdFnFlowMeter),
 		%RealWorldCmdFnFlowMeter = fun() ->	{ok, real_flow} end,
-		%io:format("de flowmeters zitten op ~p en de pijpen die over zijn zijn: ~p ~n", [FlowMeter, PipesFreeAfterFlowMeter]),
+		io:format("1 Flowmeter is made ~n"),
 
 
 		%Adding the HeatExchanger
@@ -197,7 +220,7 @@ makeHeatExchangers(1, HeatExList, HeatExTypePID, Pipes, DifferenceHeatEx) ->
     {PipesHeatExList, PipesNotUsed} = lists:split(1,Pipes),
 	[Difference | _RestDifference] = DifferenceHeatEx,
 	HE_link_spec = #{delta => Difference},
-    io:format("the used pipe is is ~p ~n", [PipesHeatExList]),
+    %io:format("the used pipe is is ~p ~n", [PipesHeatExList]),
 	{ok,HeatExInst} = heatExchangerInst:create(self(), HeatExTypePID, PipesHeatExList, HE_link_spec),
     {ok,{HeatExList ++[HeatExInst], PipesNotUsed}};
 
@@ -206,7 +229,7 @@ makeHeatExchangers(M, HeatExList, HeatExTypePID, Pipes, DifferenceHeatEx) ->
 		{PipesHeatExList, PipesNotUsed} = lists:split(1,Pipes),
 		[Difference | RestDifference] = DifferenceHeatEx,
         HE_link_spec = #{delta => Difference},
-        io:format("the used pipe is ~p ~n", [PipesHeatExList]),
+        %io:format("the used pipe is ~p ~n", [PipesHeatExList]),
         {ok,HeatExInst} = heatExchangerInst:create(self(), HeatExTypePID, PipesHeatExList, HE_link_spec),
         NewHeatExList = HeatExList ++[HeatExInst],
         M2 = M-1,

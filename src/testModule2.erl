@@ -12,6 +12,23 @@
 -export([connectPipes/1]).
 -export([stop/0, startSurvivor/0, getAllConnectors/1]).
 
+-spec startSimpleTest() -> {'ok',{_,[any(),...],[[any(),...],...],[any(),...]}}.
+-spec startNPipes(_) -> {'ok',{_,[any(),...],_,[any()]}}.
+-spec startSimpleTestFluidum() -> {'ok',{_,[any(),...],_,[any()],_,_}}.
+-spec startSimpleTestFluidumPump() -> {'ok',{_,[any(),...],_,[any()],_,_,_,_}}.
+-spec startSimpleTestFluidumPumpFlowMeter() -> {'ok',{_,[any(),...],_,[any()],_,_,_,_,_,_}}.
+-spec startSimpleTestFluidumPumpFlowMeterHeatEx() -> {'ok',{_,[any(),...],_,[any()],_,_,_,_,_,_,_,_}}.
+-spec stop() -> {'ok','stopped'}.
+-spec startSurvivor() -> {'ok','started'}.
+-spec makePipes(_,_,_) -> [any(),...] | {'error',[32 | 78 | 97 | 101 | 103 | 104 | 105 | 108 | 110 | 115 | 116 | 117 | 118,...]}.
+-spec connectPipes([any(),...]) -> any().
+-spec connectPipes(_,_,[any()]) -> any().
+-spec getAllConnectors([any()]) -> any().
+-spec getAllConnectors([any()],_) -> any().
+-spec getAllLocations([any(),...]) -> [any()].
+-spec getAllLocations([any()],[any()]) -> [any()].
+
+
 startSimpleTest() ->
 	%This function makes a simple network with 3 pipes connected together
 	%?debugFmt("Starten van de 1e functie",[]),

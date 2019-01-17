@@ -2,6 +2,12 @@
 -export([create/2]).
 -export([get_initial_state/3, get_connections_list/2, get_locations_list/2]).
 
+-spec create(atom() | tuple(),[any()]) -> any().
+-spec get_initial_state(_,_,_) -> any().
+-spec get_connections_list(_,_) -> any().
+-spec get_locations_list(_,_) -> any().
+
+
 create(Selector, ParameterList) -> 
 	% e.g. called as follows: 
 	%
